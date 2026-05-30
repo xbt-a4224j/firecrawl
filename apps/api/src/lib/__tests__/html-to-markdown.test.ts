@@ -47,4 +47,30 @@ describe("parseMarkdown", () => {
       await expect(parseMarkdown(html)).resolves.toBe(expected);
     }
   });
+
+  // Regression: issue 3583 — adjacent block-ish interactive elements (CMP cookie
+  // widgets use <button>/<label>) were glued into one token (e.g.
+  // "FunktionalFunktional"), corrupting the markdown for downstream LLMs.
+  describe("adjacent interactive elements (issue 3583)", () => {
+    it("separates adjacent <button> elements instead of gluing them", async () => {
+      const html = "<button>Funktional</button><button>Funktional</button>";
+      await expect(parseMarkdown(html)).resolves.toBe(
+        "Funktional\n\nFunktional",
+      );
+    });
+
+    it("separates a <label> from a following sibling (CMP toggle shape)", async () => {
+      const html = "<label>Funktional</label><span>Always active</span>";
+      await expect(parseMarkdown(html)).resolves.toBe(
+        "Funktional\n\nAlways active",
+      );
+    });
+
+    // Guard: genuine inline formatting runs MUST stay glued. "<b>Fire</b><b>crawl</b>"
+    // is the word "Firecrawl" — separating it would be a worse bug than the one we fix.
+    it("does NOT separate genuine inline formatting (Firecrawl stays one word)", async () => {
+      const html = "<b>Fire</b><b>crawl</b>";
+      await expect(parseMarkdown(html)).resolves.toBe("**Fire****crawl**");
+    });
+  });
 });
