@@ -1,0 +1,38 @@
+{
+  "name": "scrape-quality",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Score the LLM-readiness of a Firecrawl scrape result — grade(doc).",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "vitest run e2e",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "grade": "tsx src/cli.ts",
+    "build:demo": "tsx src/demo/build.ts",
+    "corpus": "tsx scripts/run-corpus.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "gpt-tokenizer": "^3.4.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^29.1.1",
+    "tsx": "^4.22.3",
+    "typescript": "^5.8.3",
+    "vite": "^5",
+    "vitest": "^2.1.8"
+  }
+}
