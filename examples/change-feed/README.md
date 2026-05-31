@@ -34,9 +34,24 @@ pnpm watch https://openai.com/pricing https://news.ycombinator.com --diff
 #   run again later → CHANGED items, each with an LLM "what changed & why", and the diff
 
 pnpm watch --file=watchlist.txt          # one URL per line
+pnpm watch <urls> --only-significant      # mute the 🟡 trivial churn, show only real changes
 ```
 
-Schedule it (cron / GitHub Action) to get a recurring "what changed across my watchlist" digest.
+Every run prints what it cost — `… · 5 credits used · 955 remaining` — so it never quietly burns your
+quota. (The LLM summary only fires on a *changed* page, so low-churn pages like pricing/terms are ~free.)
+
+## Dashboard
+
+```bash
+export FIRECRAWL_API_KEY=fc-...
+pnpm dev          # → http://localhost:5173
+```
+
+Paste URLs → **Check** → a live feed: each page is a card (🔴 real change / 🟡 minor / ⚪ no change / 🆕
+new), with the LLM "what changed" and an expandable diff, plus the credits the run used. Your key stays
+**server-side** (a tiny `/api/check` route holds it) — the browser never sees it.
+
+Schedule the CLI (cron / GitHub Action) to get a recurring "what changed across my watchlist" digest.
 
 ## How it works (the code)
 
