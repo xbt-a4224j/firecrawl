@@ -17,15 +17,17 @@
 | **scrape-quality** | LLM-readiness score for a scrape (`grade(doc)`) | [`scrape-quality`](https://github.com/xbt-a4224j/firecrawl/tree/scrape-quality/examples/scrape-quality) | `pnpm grade <url>` |
 | **Zod v4 fix** (issue 3300) | v4 schema silently dropped → empty extraction | [`fix/3300-zod-scrape-schema`](https://github.com/xbt-a4224j/firecrawl/tree/fix/3300-zod-scrape-schema) | `npx jest scrape-json-schema` |
 | **glue fix** (issue 3583) | adjacent `<button>`/`<label>` glued in HTML→md | [`fix/3583-inline-glue`](https://github.com/xbt-a4224j/firecrawl/tree/fix/3583-inline-glue) | `npx jest html-to-markdown -t "issue 3583"` |
-| **🎮 API playground** | interactive, no-key explainer for every v2 endpoint + a Schema Lab + a sync-vs-async walkthrough | this branch (`playground.html`) | **[▶ open it live](https://raw.githack.com/xbt-a4224j/firecrawl/portfolio/playground.html)** |
+| **🎮 API playground** | interactive, no-key explainer for every v2 endpoint + a Schema Lab + a sync-vs-async walkthrough | this branch (`playground.html`) | **[▶ see the demo ↓](#the-playground)** · open `playground.html` |
 
 ---
 
 ## The playground
 
 A self-contained, **no-API-key** playground I built to internalize the v2 surface — and make it teachable.
-**[▶ Open it live](https://raw.githack.com/xbt-a4224j/firecrawl/portfolio/playground.html)** (renders straight
-from this branch; or clone and open `playground.html`).
+Clone this branch and open `playground.html` in any browser — nothing calls the network, every response is a
+realistic sample, so you can explore the request/response *shapes* safely. Here's the full tour:
+
+![Firecrawl playground — scrolling through the four mental-model cards, the sync-vs-async lanes, the Schema Lab (Zod v4 → JSON Schema), and every v2 endpoint with editable requests and annotated responses](assets/playground-demo.gif)
 
 - **Every endpoint** — scrape / map / search / crawl / batch / extract / agent / monitor — with editable
   request bodies and realistic responses, plus an annotated table of every key parameter.
