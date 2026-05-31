@@ -1,6 +1,5 @@
 import { zodToJsonSchema as zodToJsonSchemaLib } from "zod-to-json-schema";
-
-type SchemaConverter = (schema: unknown) => unknown;
+import { toJSONSchema as zodV4ToJsonSchema } from "zod/v4";
 
 export function isZodSchema(value: unknown): boolean {
   if (!value || typeof value !== "object") return false;
@@ -25,15 +24,16 @@ function tryZodV4Conversion(schema: unknown): Record<string, unknown> | null {
   if (!isZodV4Schema(schema)) return null;
 
   try {
-    const zodModule = (schema as Record<string, unknown>).constructor?.prototype?.constructor;
-    if (zodModule && typeof (zodModule as Record<string, unknown>).toJSONSchema === "function") {
-      return (zodModule as { toJSONSchema: SchemaConverter }).toJSONSchema(schema) as Record<string, unknown>;
-    }
+    // In Zod v4, `toJSONSchema` is a MODULE-LEVEL export (z.toJSONSchema), not a method on the
+    // schema's class — so reflecting it off the prototype chain always missed and fell through to
+    // the v3-only `zod-to-json-schema` lib, which can't read v4's `_zod` internals and emitted a
+    // contentless stub. zod@3.25+ ships the v4 implementation at the `zod/v4` subpath; call it
+    // directly. (issue 3300)
+    return zodV4ToJsonSchema(schema as Parameters<typeof zodV4ToJsonSchema>[0]) as Record<string, unknown>;
   } catch {
-    // V4 conversion not available
+    // V4 conversion not available — fall back to the v3 path below.
+    return null;
   }
-
-  return null;
 }
 
 export function zodSchemaToJsonSchema(schema: unknown): Record<string, unknown> | unknown {
