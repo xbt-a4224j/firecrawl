@@ -40,6 +40,28 @@ pnpm watch <urls> --only-significant      # mute the 🟡 trivial churn, show on
 Every run prints what it cost — `… · 5 credits used · 955 remaining` — so it never quietly burns your
 quota. (The LLM summary only fires on a *changed* page, so low-churn pages like pricing/terms are ~free.)
 
+## See it catch a real change
+
+Point it at a page you control, change it, and watch it get caught:
+
+```bash
+pnpm watch https://example.com/pricing          # 1. baseline → 🆕 NEW
+#    ... edit the page: raise the Pro plan $20 → $29 ...
+pnpm watch https://example.com/pricing --diff    # 2. re-check
+```
+```
+🔴  CHANGED  https://example.com/pricing
+    The pricing for the Pro plan changed from $20 to $29 per month.
+    @@ -21,12 +21,12 @@
+    -$20 / month — unlimited projects ...
+    +$29 / month — unlimited projects ...
+
+— 1 changed (1 significant) · 1 watched · 1 scrapes · 1 change-summaries · 5 credits used · 945 remaining —
+```
+
+It flagged the **price** as significant and muted the surrounding timestamp churn — that's the point:
+*meaningful* changes, not raw diffs.
+
 ## Dashboard
 
 ```bash
