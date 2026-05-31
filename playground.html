@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Firecrawl playground — learn the endpoints</title>
+<style>
+:root{
+  --ink:#18181b;--mut:#71717a;--soft:#a1a1aa;--line:#e4e4e7;--bg:#fafafa;--card:#fff;
+  --or:#f97316;--orbg:#fff7ed;--orln:#fed7aa;--orink:#c2410c;
+  --grn:#10b981;--grnbg:#ecfdf5;--blu:#3b82f6;--blubg:#eff6ff;--red:#ef4444;--redbg:#fef2f2;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+code,pre,.mono{font-family:var(--mono)}
+a{color:var(--orink)}
+/* sidebar */
+#nav{position:fixed;top:0;left:0;bottom:0;width:244px;overflow-y:auto;background:#fff;border-right:1px solid var(--line);z-index:10}
+#nav .h{padding:18px 18px 12px;border-bottom:1px solid #f1f1f3}
+#nav .h b{font-size:15px;letter-spacing:-.01em}.f{color:var(--or)}
+#nav .h .s{font-size:11px;color:var(--soft);margin-top:3px}
+#nav .grp{padding:12px 10px 4px 18px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--soft)}
+#nav a{display:flex;gap:8px;align-items:baseline;padding:6px 16px 6px 18px;text-decoration:none;color:#3f3f46;border-left:3px solid transparent;font-size:13.5px}
+#nav a:hover{background:var(--orbg)}#nav a.cur{background:var(--orbg);border-left-color:var(--or);color:var(--orink);font-weight:600}
+#nav a .m{font-family:var(--mono);font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;align-self:center}
+.mPOST{background:#dcfce7;color:#15803d}.mGET{background:#dbeafe;color:#1d4ed8}
+.wrap{margin-left:244px;max-width:1100px;padding:0 32px 120px}
+section{padding-top:46px;border-top:1px solid var(--line);margin-top:46px}
+section:first-of-type{border-top:0;margin-top:0;padding-top:34px}
+h1{font-size:30px;letter-spacing:-.02em;margin:0 0 6px}
+h2{font-size:23px;letter-spacing:-.02em;margin:4px 0 8px}
+h3{font-size:16px;margin:22px 0 8px}
+.lede{font-size:17px;color:#3f3f46;max-width:74ch;margin:0 0 14px}
+p{max-width:74ch}.mut{color:var(--mut)}
+.pill{display:inline-block;font-family:var(--mono);font-size:12px;background:var(--orbg);color:var(--orink);border:1px solid var(--orln);border-radius:999px;padding:2px 10px;margin:0 4px 4px 0}
+.ep{font-family:var(--mono);font-size:14px;background:#0f172a;color:#e2e8f0;border-radius:8px;padding:6px 12px;display:inline-block;margin:4px 0 10px}
+.ep .v{color:#86efac;font-weight:700}
+/* cards / grid */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:900px){.g2{grid-template-columns:1fr}}
+.call{display:flex;gap:11px;border-radius:10px;padding:12px 15px;margin:14px 0;border:1px solid var(--line);background:#fff}
+.call .i{font-size:18px}.call.k{background:var(--orbg);border-color:var(--orln)}.call.k b{color:var(--orink)}
+.call.w{background:var(--redbg);border-color:#fecaca}.call.w b{color:#b91c1c}
+.call.n{background:var(--blubg);border-color:#bfdbfe}.call.n b{color:#1d4ed8}
+.call p{margin:0}
+/* editor */
+.lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--soft);margin:0 0 5px}
+textarea{width:100%;font-family:var(--mono);font-size:12.5px;line-height:1.55;border:1px solid var(--line);border-radius:9px;
+  padding:11px 13px;background:#0f172a;color:#e2e8f0;resize:vertical;min-height:120px;tab-size:2}
+textarea:focus{outline:2px solid var(--orln);border-color:var(--or)}
+.out{background:#0f172a;border-radius:9px;padding:11px 13px;overflow:auto;max-height:420px}
+.out pre{margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.55;color:#e2e8f0;white-space:pre-wrap;word-break:break-word}
+.btn{font:600 13px var(--sans);background:var(--or);color:#fff;border:0;border-radius:8px;padding:8px 16px;cursor:pointer}
+.btn:hover{background:#ea580c}.btn.g{background:#18181b}.btn.g:hover{background:#3f3f46}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+select{font:13px var(--sans);border:1px solid var(--line);border-radius:7px;padding:6px 9px;background:#fff}
+/* fields table */
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--soft)}
+td code{font-size:12.5px;background:#f4f4f5;border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.tbl{border:1px solid var(--line);border-radius:10px;overflow:hidden}.tbl table{margin:0}tr:last-child td{border-bottom:0}
+/* json syntax (light) */
+.jk{color:#7dd3fc}.js{color:#86efac}.jn{color:#fca5a5}.jb{color:#c084fc}.jp{color:#cbd5e1}
+/* spine */
+.spine{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.spine{grid-template-columns:1fr}}
+.lane{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+.lane h4{margin:0 0 4px;font-size:15px}.lane .tag{font-family:var(--mono);font-size:11px;color:var(--mut)}
+.steps{margin:12px 0;min-height:150px}
+.step{display:flex;gap:9px;align-items:flex-start;padding:7px 0;opacity:.25;transition:opacity .25s}
+.step.on{opacity:1}.step .dot{width:9px;height:9px;border-radius:50%;background:var(--soft);margin-top:6px;flex:0 0 auto}
+.step.on .dot{background:var(--or)}.step.done .dot{background:var(--grn)}
+.step .t{font-size:13.5px}.step .t b{font-family:var(--mono);font-size:11.5px}
+.tree{font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#3f3f46;white-space:pre-wrap}
+.tree .ty{color:var(--or)}
+.note{font-size:12.5px;color:var(--mut);margin-top:6px}
+kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px}
+</style></head>
+<body>
+<nav id="nav"><div class="h"><b><span class="f">🔥</span> Firecrawl playground</b><div class="s">learn the endpoints by toying</div></div>
+  <div class="grp">Start here</div>
+  <a href="#concepts"><span>The 4 ideas</span></a>
+  <a href="#spine"><span>Sync vs async</span></a>
+  <a href="#schema"><span>Schema Lab ⭐</span></a>
+  <div class="grp">Endpoints</div>
+  <a href="#scrape"><span class="m mPOST">POST</span><span>/scrape</span></a>
+  <a href="#map"><span class="m mPOST">POST</span><span>/map</span></a>
+  <a href="#search"><span class="m mPOST">POST</span><span>/search</span></a>
+  <a href="#crawl"><span class="m mPOST">POST</span><span>/crawl</span></a>
+  <a href="#batch"><span class="m mPOST">POST</span><span>/batch/scrape</span></a>
+  <a href="#extract"><span class="m mPOST">POST</span><span>/extract</span></a>
+  <a href="#agent"><span class="m mPOST">POST</span><span>/agent</span></a>
+  <a href="#monitor"><span class="m mPOST">POST</span><span>/monitor</span></a>
+</nav>
+<div class="wrap">
+
+<section id="concepts" style="border-top:0">
+  <h1>The playground</h1>
+  <p class="lede">Toy with every Firecrawl endpoint without an API key. Edit the requests, hit <b>Run</b>, and read the annotated responses. Nothing here calls the network — responses are realistic samples so you can learn the <em>shapes</em> safely. Start with the four ideas, then the Schema Lab.</p>
+
+  <div class="g2">
+    <div class="card"><h3 style="margin-top:0">① One base, two verbs</h3><p class="mut" style="margin:0">Everything is <code>POST https://api.firecrawl.dev/v2/&lt;thing&gt;</code> with <code>Authorization: Bearer fc-…</code>. Some endpoints answer <b>inline</b> (you get data back). Some answer with a <b>job id</b> you poll with <code>GET …/&lt;id&gt;</code>. That split is the whole mental model — see <a href="#spine">Sync vs async</a>.</p></div>
+    <div class="card"><h3 style="margin-top:0">② formats = what you want back</h3><p class="mut" style="margin:0"><code>formats: ["markdown","html","links","screenshot","summary", {type:"json", schema}, {type:"changeTracking"}]</code>. You ask for the shapes you need; Firecrawl fills only those. <code>markdown</code> is the default and the product.</p></div>
+    <div class="card"><h3 style="margin-top:0">③ Structured extraction = schema</h3><p class="mut" style="margin:0">Instead of markdown, you hand Firecrawl a <b>JSON Schema</b> describing the fields you want, and an LLM fills it from the page. No schema → it free-forms from a <code>prompt</code>. This is the <a href="#schema">Schema Lab</a>.</p></div>
+    <div class="card"><h3 style="margin-top:0">④ Heavy work is async</h3><p class="mut" style="margin:0">A single page is fast → returned inline (<code>/scrape</code>). Crawling a whole site, or running an LLM over many pages (<code>/extract</code>), takes seconds-to-minutes → so the API hands you an <code>id</code> in &lt;1s and does the work in a background worker you poll.</p></div>
+  </div>
+</section>
+
+<!-- ============ SYNC VS ASYNC ============ -->
+<section id="spine">
+  <h2>Sync vs async — the part that confused you</h2>
+  <p class="lede">This is the one thing to internalize. <b>Same company, two response styles.</b> Press <b>Send</b> on each lane and watch what comes back.</p>
+
+  <div class="call n"><span class="i">🧩</span><p><b>Plain English:</b> "sync" = the HTTP connection stays open while Firecrawl does the work, and the finished data comes back in that one response. "async" = Firecrawl can't finish in one request (too slow), so it immediately says "started, here's your ticket number (<code>id</code>)" and you call back later to ask "done yet?" until it is. That callback-asking is <b>polling</b>.</p></div>
+
+  <div class="spine">
+    <div class="lane">
+      <h4>🟢 /scrape — synchronous</h4><div class="tag">one page · ~1–4s · data inline</div>
+      <div class="steps" id="syncSteps">
+        <div class="step" data-i="0"><div class="dot"></div><div class="t"><b>POST /v2/scrape</b> &nbsp;{ url }</div></div>
+        <div class="step" data-i="1"><div class="dot"></div><div class="t">connection held open… engine fetches + renders the page</div></div>
+        <div class="step" data-i="2"><div class="dot"></div><div class="t">HTML → clean markdown (the transformer pipeline)</div></div>
+        <div class="step" data-i="3"><div class="dot"></div><div class="t"><b>200</b> { success, <b>data: Document</b> } — finished markdown <b>in this same response</b></div></div>
+      </div>
+      <button class="btn" onclick="runSync()">Send ▶</button>
+      <div class="note">No id, no polling. You asked, you waited a couple seconds, you got the document. One round trip.</div>
+    </div>
+
+    <div class="lane">
+      <h4>🔵 /extract — asynchronous</h4><div class="tag">many pages + LLM · seconds–minutes · id then poll</div>
+      <div class="steps" id="asyncSteps">
+        <div class="step" data-i="0"><div class="dot"></div><div class="t"><b>POST /v2/extract</b> &nbsp;{ urls, schema }</div></div>
+        <div class="step" data-i="1"><div class="dot"></div><div class="t">controller validates → mints <b>uuidv7</b> → saves <b>status:"processing"</b> to Redis → enqueues job</div></div>
+        <div class="step" data-i="2"><div class="dot"></div><div class="t"><b>200</b> { success, <b>id</b> } returned in <b>&lt;1s</b> — <b>no data yet</b></div></div>
+        <div class="step" data-i="3"><div class="dot"></div><div class="t"><b>GET /v2/extract/:id</b> → { status:<b>"processing"</b> } &nbsp;<span class="mut">(worker still chewing)</span></div></div>
+        <div class="step" data-i="4"><div class="dot"></div><div class="t"><b>GET /v2/extract/:id</b> → { status:<b>"processing"</b> } &nbsp;<span class="mut">(poll again…)</span></div></div>
+        <div class="step" data-i="5"><div class="dot"></div><div class="t"><b>GET /v2/extract/:id</b> → { status:<b>"completed", data:{…}</b> } ✓</div></div>
+      </div>
+      <div class="row"><button class="btn" id="asyncBtn" onclick="runAsync()">Send ▶</button><button class="btn g" id="pollBtn" onclick="pollAsync()" disabled>Poll /:id ↻</button></div>
+      <div class="note">The <code>id</code> is your ticket. You keep calling <kbd>Poll</kbd> until <code>status</code> flips to <code>completed</code>. Then the data is there.</div>
+    </div>
+  </div>
+
+  <div class="call k"><span class="i">🎯</span><p><b>Why the split exists (interview answer):</b> a worker can only hold an HTTP connection open so long before it times out and ties up resources. One page fits in that budget, so <code>/scrape</code> is sync for the best DX. But an LLM extraction across many URLs, or a 5,000-page crawl, can't — so the controller returns an <code>id</code> in &lt;1s and a background worker does the slow part. <code>/scrape</code> uses <code>skipNuq:true</code> to bypass the very queue that <code>/extract</code> and <code>/crawl</code> rely on.</p></div>
+
+  <div class="card"><div class="lbl">The async response, verbatim from extractController</div>
+    <div class="out"><pre>// returns IMMEDIATELY — note: no markdown, no json, just the ticket
+{ <span class="jk">"success"</span>: <span class="jb">true</span>, <span class="jk">"id"</span>: <span class="js">"0192f3a1-7c4e-7abc-..."</span>, <span class="jk">"urlTrace"</span>: [] }</pre></div>
+    <p class="note">And the one hard rule baked into the controller: pass <code>agent.model: "v3-beta"</code> and it <b>rejects with 400 → "Use the new /agent endpoint instead."</b> That's the fingerprint that <code>/extract</code>'s <code>agent</code> param is the <em>legacy</em> FIRE-1 path, while v3 autonomy graduated to its own <a href="#agent">/agent</a> endpoint.</p>
+  </div>
+</section>
+
+<!-- ============ SCHEMA LAB ============ -->
+<section id="schema">
+  <h2>Schema Lab ⭐ — structured extraction made tangible</h2>
+  <p class="lede">This is the thing to actually <em>get</em>. A <b>JSON Schema</b> is a description of the shape you want back. You hand it to Firecrawl, an LLM reads the page, and returns JSON matching that shape. Edit the schema on the left → press <b>Extract</b> → see the filled response on the right.</p>
+
+  <div class="row"><span class="mut" style="font-size:13px">Load a preset:</span>
+    <select id="schemaPreset" onchange="loadPreset(this.value)">
+      <option value="company">Company info (nested)</option>
+      <option value="pricing">Pricing tiers (array of objects)</option>
+      <option value="simple">Single field (string)</option>
+      <option value="enum">Enum + boolean</option>
+    </select>
+  </div>
+
+  <div class="g2">
+    <div>
+      <div class="lbl">Your JSON Schema (edit me)</div>
+      <textarea id="schemaIn" style="min-height:300px"></textarea>
+      <div class="note">A schema is just <code>type</code> + <code>properties</code>. Nest objects, use <code>items</code> for arrays, <code>enum</code> for fixed choices.</div>
+    </div>
+    <div>
+      <div class="lbl">What Firecrawl returns (generated from your schema)</div>
+      <div class="out" id="schemaOut" style="min-height:300px"><pre class="mut">press Extract ▶</pre></div>
+      <div class="row"><button class="btn" onclick="runSchema()">Extract ▶</button><span id="schemaErr" style="color:#b91c1c;font-size:12.5px"></span></div>
+    </div>
+  </div>
+
+  <h3>How it reads as a request</h3>
+  <div class="card"><div class="out"><pre>POST /v2/scrape          <span class="jp">// schema on a single page = sync, inline</span>
+{
+  <span class="jk">"url"</span>: <span class="js">"https://example.com/about"</span>,
+  <span class="jk">"formats"</span>: [
+    { <span class="jk">"type"</span>: <span class="js">"json"</span>, <span class="jk">"prompt"</span>: <span class="js">"Extract the company details"</span>, <span class="jk">"schema"</span>: <span class="jp">{…your schema…}</span> }
+  ]
+}
+<span class="jp">// → 200 { success, data: { json: {…filled…}, markdown, metadata } }</span></pre></div>
+    <p class="note">Same schema across <em>many</em> URLs? That's <a href="#extract">/extract</a> — and because it's an LLM over many pages, it goes <b>async</b> (id + poll). One page with a schema stays on <code>/scrape</code> and comes back inline.</p>
+  </div>
+
+  <h3>The plain-English tree of your schema</h3>
+  <div class="card"><div class="tree" id="schemaTree">—</div></div>
+
+  <div class="call w"><span class="i">🐞</span><p><b>The #3300 trap (your fix's home turf):</b> you usually write the schema as a <b>Zod</b> object in code (<code>z.object({ name: z.string() })</code>) and the SDK converts it to the JSON Schema above. In Zod <b>v4</b>, the converter (<code>tryZodV4Conversion</code>) walked <code>schema.constructor.prototype.constructor</code> looking for <code>toJSONSchema</code> — but in v4 that's a <b>module-level export</b>, not a prototype method. The walk returned <code>null</code>, it fell through to the v3 lib, and shipped an <b>empty</b> <code>{"$schema":"…draft-07"}</code> stub → the API had no fields → <code>result.json</code> came back <code>undefined</code>. A silent types-vs-runtime lie. The fix: <code>import { toJSONSchema } from "zod/v4"</code> and call it directly.</p></div>
+</section>
+
+<!-- ============ ENDPOINTS (rendered by JS) ============ -->
+<div id="endpoints"></div>
+
+</div>
+<script>
+/* ---------- JSON pretty-printer with light syntax colors ---------- */
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function color(json){
+  return esc(json)
+    .replace(/("(\\.|[^"\\])*")(\s*:)/g,'<span class="jk">$1</span>$3')   // keys
+    .replace(/:\s*("(\\.|[^"\\])*")/g,': <span class="js">$1</span>')      // string vals
+    .replace(/\b(true|false|null)\b/g,'<span class="jb">$1</span>')
+    .replace(/(:\s*)(-?\d+\.?\d*)/g,'$1<span class="jn">$2</span>');
+}
+function show(elId,obj){document.getElementById(elId).innerHTML='<pre>'+color(JSON.stringify(obj,null,2))+'</pre>';}
+
+/* ---------- Schema Lab: generate a sample from a JSON schema ---------- */
+const SAMPLE_STR=["Firecrawl","the eyes for AGI","San Francisco, CA","2026-05-31","clean markdown"];
+let stri=0;
+function sampleFromSchema(s){
+  if(!s||typeof s!=="object") return null;
+  if(s.enum&&Array.isArray(s.enum)) return s.enum[0];
+  switch(s.type){
+    case "string": return SAMPLE_STR[(stri++)%SAMPLE_STR.length];
+    case "number": case "integer": return Math.round((19+Math.random()*280));
+    case "boolean": return true;
+    case "array": return [sampleFromSchema(s.items||{type:"string"}), sampleFromSchema(s.items||{type:"string"})];
+    case "object": default: {
+      const o={}; const props=s.properties||{};
+      for(const k of Object.keys(props)) o[k]=sampleFromSchema(props[k]);
+      return o;
+    }
+  }
+}
+function treeOf(s,ind){
+  ind=ind||"";let out="";
+  if(s.type==="object"||s.properties){
+    const p=s.properties||{};
+    for(const k of Object.keys(p)){
+      const v=p[k]; const t=v.enum?("enum: "+v.enum.join(" | ")):(v.type||"object");
+      out+=ind+k+"  <span class='ty'>"+t+"</span>\n";
+      if(v.type==="object"||v.properties) out+=treeOf(v,ind+"   ");
+      else if(v.type==="array"&&v.items&&(v.items.type==="object"||v.items.properties)) out+=treeOf(v.items,ind+"   - ");
+    }
+  }
+  return out;
+}
+const PRESETS={
+  company:{type:"object",properties:{company_name:{type:"string"},mission:{type:"string"},hq_location:{type:"string"},funding:{type:"object",properties:{round:{type:"string"},amount_usd:{type:"number"},lead_investor:{type:"string"}}}}},
+  pricing:{type:"object",properties:{tiers:{type:"array",items:{type:"object",properties:{name:{type:"string"},price_per_month:{type:"number"},seats_included:{type:"integer"}}}}}},
+  simple:{type:"object",properties:{headline:{type:"string"}}},
+  enum:{type:"object",properties:{category:{type:"string",enum:["pricing","docs","blog","other"]},is_paywalled:{type:"boolean"}}}
+};
+function loadPreset(k){document.getElementById("schemaIn").value=JSON.stringify(PRESETS[k],null,2);refreshTree();}
+function refreshTree(){try{const s=JSON.parse(document.getElementById("schemaIn").value);document.getElementById("schemaTree").innerHTML=treeOf(s)||"(no properties)";}catch(e){document.getElementById("schemaTree").textContent="⚠ invalid JSON";}}
+function runSchema(){
+  const err=document.getElementById("schemaErr");err.textContent="";
+  let s;try{s=JSON.parse(document.getElementById("schemaIn").value);}catch(e){err.textContent="⚠ "+e.message;return;}
+  stri=0; show("schemaOut",{json:sampleFromSchema(s)}); refreshTree();
+}
+document.getElementById("schemaIn").addEventListener("input",refreshTree);
+loadPreset("company");
+
+/* ---------- Sync / async steppers ---------- */
+function lightUp(containerId,n,done){
+  const steps=document.querySelectorAll("#"+containerId+" .step");
+  steps.forEach((s)=>{const i=+s.dataset.i; s.classList.toggle("on",i<=n); s.classList.toggle("done", done&&i<=n);});
+}
+function runSync(){
+  const steps=[...document.querySelectorAll("#syncSteps .step")];let i=0;
+  steps.forEach(s=>s.classList.remove("on","done"));
+  const t=setInterval(()=>{steps[i].classList.add("on");if(i>0)steps[i-1].classList.add("done");i++;if(i>=steps.length){clearInterval(t);setTimeout(()=>steps.forEach(s=>s.classList.add("done")),300);}},650);
+}
+let asyncPolls=0;
+function runAsync(){
+  asyncPolls=0;const steps=[...document.querySelectorAll("#asyncSteps .step")];
+  steps.forEach(s=>s.classList.remove("on","done"));
+  steps[0].classList.add("on");setTimeout(()=>{steps[0].classList.add("done");steps[1].classList.add("on");},500);
+  setTimeout(()=>{steps[1].classList.add("done");steps[2].classList.add("on");document.getElementById("pollBtn").disabled=false;document.getElementById("asyncBtn").textContent="Sent ✓ id minted";},1100);
+}
+function pollAsync(){
+  const steps=[...document.querySelectorAll("#asyncSteps .step")];
+  if(asyncPolls===0){steps[2].classList.add("done");steps[3].classList.add("on","done");asyncPolls=1;}
+  else if(asyncPolls===1){steps[4].classList.add("on","done");asyncPolls=2;}
+  else{steps[5].classList.add("on","done");document.getElementById("pollBtn").disabled=true;document.getElementById("pollBtn").textContent="completed ✓";}
+}
+
+/* ---------- Endpoints ---------- */
+const EP=[
+ {id:"scrape",m:"POST",path:"/v2/scrape",sync:true,title:"/scrape — one URL → LLM-ready data",
+  blurb:"The flagship. One page in, clean markdown (or structured JSON, html, screenshot, links) out — <b>inline, synchronous</b>. This is the endpoint the role owns.",
+  examples:{
+    "markdown (default)":{url:"https://firecrawl.dev"},
+    "main content + screenshot":{url:"https://news.ycombinator.com",formats:["markdown","screenshot"],onlyMainContent:true},
+    "structured json":{url:"https://example.com/pricing",formats:[{type:"json",prompt:"Get the pricing tiers",schema:{type:"object",properties:{tiers:{type:"array",items:{type:"object",properties:{name:{type:"string"},price:{type:"number"}}}}}}}]},
+    "actions (infinite scroll)":{url:"https://example.com/feed",actions:[{type:"scroll",direction:"down"},{type:"wait",milliseconds:1500},{type:"scrape"}]}
+  },
+  resp:{success:true,data:{markdown:"# Firecrawl\nThe eyes for AGI…",metadata:{title:"Firecrawl",statusCode:200,sourceURL:"https://firecrawl.dev"},cacheState:"hit"}},
+  fields:[["url","string","the page to scrape (required)"],["formats","string[] | object[]","what to return: markdown (default), html, rawHtml, links, screenshot, summary, {type:'json',schema}, {type:'changeTracking'}"],["onlyMainContent","boolean","strip nav/footer/cookie boilerplate (default true)"],["actions","Action[]","browser steps before capture: wait/click/scroll/write/press/executeJavascript/screenshot/scrape/pdf"],["maxAge","number","cache freshness window in ms; omit → learned per-domain window"],["proxy","'basic'|'stealth'|'auto'","escalate for anti-bot sites"],["waitFor","number","ms to wait for JS before capture"]]},
+
+ {id:"map",m:"POST",path:"/v2/map",sync:true,title:"/map — discover every URL on a site, fast",
+  blurb:"Returns a flat list of URLs <b>inline</b>. Hits 3 sources in parallel — sitemap, Firecrawl's URL index, and a cached <code>site:</code> SERP query — and merges them. No crawling, seconds not minutes.",
+  examples:{"all urls":{url:"https://docs.firecrawl.dev"},"filtered by search":{url:"https://docs.firecrawl.dev",search:"changeTracking"}},
+  resp:{success:true,links:["https://docs.firecrawl.dev/introduction","https://docs.firecrawl.dev/features/scrape","https://docs.firecrawl.dev/features/changeTracking","…"]},
+  fields:[["url","string","the site to map (required)"],["search","string","rank/filter URLs by relevance to this term"],["limit","number","max URLs to return"],["sitemapOnly","boolean","trust only the declared sitemap"]]},
+
+ {id:"search",m:"POST",path:"/v2/search",sync:true,title:"/search — web search + full page content",
+  blurb:"SERP results <b>plus</b> the scraped content of each — search and scrape in one call. Sources: web, news, images.",
+  examples:{"basic":{query:"firecrawl alternatives",limit:5},"with scraping":{query:"best web scraping API 2026",limit:3,scrapeOptions:{formats:["markdown"]}}},
+  resp:{success:true,data:{web:[{url:"https://firecrawl.dev",title:"Firecrawl",description:"The API to scrape the web…",markdown:"# Firecrawl…"}]}},
+  fields:[["query","string","the search query (required)"],["limit","number","max results (max 10)"],["sources","('web'|'news'|'images')[]","which result types"],["scrapeOptions","object","if set, each result is scraped with these options"]]},
+
+ {id:"crawl",m:"POST",path:"/v2/crawl",sync:false,title:"/crawl — scrape a whole site (async)",
+  blurb:"BFS over a site's link graph. <b>Async</b>: returns an <code>id</code> in &lt;1s, you poll <code>GET /v2/crawl/:id</code> for status + the pages as they finish.",
+  examples:{"basic":{url:"https://docs.firecrawl.dev",limit:50},"scoped":{url:"https://example.com",includePaths:["/blog/.*"],excludePaths:["/tags/.*"],maxDepth:3,limit:100}},
+  resp:{success:true,id:"a1b2c3d4-…",url:"https://api.firecrawl.dev/v2/crawl/a1b2c3d4-…"},
+  poll:{status:"scraping",total:50,completed:23,creditsUsed:23,next:"https://api.firecrawl.dev/v2/crawl/a1b2c3d4-…?skip=23",data:[{markdown:"# Page…",metadata:{sourceURL:"https://docs.firecrawl.dev/x"}}]},
+  fields:[["url","string","the seed URL (required)"],["limit","number","max pages to crawl"],["maxDepth","number","how many link-hops from the seed"],["includePaths/excludePaths","string[]","regex path filters"],["allowBackwardLinks","boolean","follow links to parent paths"],["scrapeOptions","object","how to scrape each page (formats, etc.)"]]},
+
+ {id:"batch",m:"POST",path:"/v2/batch/scrape",sync:false,title:"/batch/scrape — many known URLs (async)",
+  blurb:"Same async spine as crawl, but you supply the URL list yourself (no discovery). Returns an <code>id</code>, poll for results. The status endpoint pages results with a cursor + a 10 MiB cap so one poll is never unbounded.",
+  examples:{"basic":{urls:["https://a.com","https://b.com","https://c.com"],formats:["markdown"]}},
+  resp:{success:true,id:"b4tch-…",url:"https://api.firecrawl.dev/v2/batch/scrape/b4tch-…"},
+  poll:{status:"completed",total:3,completed:3,data:[{markdown:"# A…"},{markdown:"# B…"},{markdown:"# C…"}]},
+  fields:[["urls","string[]","the URLs to scrape (required)"],["formats","string[]","what to return for each"],["ignoreInvalidURLs","boolean","skip bad URLs instead of erroring"]]},
+
+ {id:"extract",m:"POST",path:"/v2/extract",sync:false,title:"/extract — schema over many pages (async)",
+  blurb:"Hand it URLs + a schema (or just a prompt) and an LLM extracts structured data across all of them. <b>Async</b> (LLM × many pages): returns an <code>id</code> in &lt;1s → poll <code>GET /v2/extract/:id</code> until <code>status:'completed'</code>.",
+  examples:{"schema":{urls:["https://firecrawl.dev"],prompt:"Extract the product details",schema:{type:"object",properties:{name:{type:"string"},tagline:{type:"string"},endpoints:{type:"array",items:{type:"string"}}}}},"prompt only + web search":{urls:["https://firecrawl.dev"],prompt:"What does this company do and who are its competitors?",enableWebSearch:true}},
+  resp:{success:true,id:"0192f3a1-7c4e-7abc-…",urlTrace:[]},
+  poll:{success:true,status:"completed",data:{name:"Firecrawl",tagline:"The eyes for AGI",endpoints:["scrape","crawl","map","search","extract"]}},
+  fields:[["urls","string[]","pages to extract from"],["prompt","string","what to pull (free-form if no schema)"],["schema","JSON Schema","the structured shape to return"],["systemPrompt","string","steer the extractor's behavior"],["enableWebSearch","boolean","let it follow external links / search to fill gaps"],["allowExternalLinks","boolean","same idea — go beyond the given URLs"],["agent","object","⚠️ legacy FIRE-1 path; agent.model:'v3-beta' is REJECTED → use /agent"]]},
+
+ {id:"agent",m:"POST",path:"/v2/agent",sync:false,title:"/agent — autonomous web actions (FIRE-1 / v3)",
+  blurb:"Describe a goal in plain language; the agent navigates, clicks, fills, and extracts on its own. This is where v3 autonomy graduated to — the thing <code>/extract</code> sends you to when you ask for <code>v3-beta</code>. <b>Async</b>.",
+  examples:{"goal":{prompt:"Go to the pricing page, select the annual plan, and return the total for 10 seats",url:"https://example.com"}},
+  resp:{success:true,id:"agent-…"},
+  poll:{success:true,status:"completed",data:{result:"Annual, 10 seats = $2,400/yr",steps:["navigated to /pricing","toggled annual","set seats=10","read total"]}},
+  fields:[["prompt","string","the goal, in natural language"],["url","string","where to start"],["model","string","the agent model (v3 line)"]]},
+
+ {id:"monitor",m:"POST",path:"/v2/monitor",sync:false,title:"/monitor — get told when the web changes",
+  blurb:"Schedules recurring change-tracking on URLs and notifies you on meaningful changes. <code>goal</code> + <code>judge_enabled</code> add an LLM judge that labels each diff meaningful-vs-noise (this is the productized version of your change-feed's <code>significant</code> flag).",
+  examples:{"with goal+judge":{url:"https://example.com/pricing",goal:"alert me only when prices change",judge_enabled:true}},
+  resp:{success:true,id:"mon-…",url:"https://example.com/pricing",goal:"alert me only when prices change",judgeEnabled:true},
+  fields:[["url","string","page to watch"],["goal","string","plain-language 'what counts as meaningful'"],["judge_enabled","boolean","turn on the LLM judge (+1 credit per judged changed page)"],["tag","string","independent watch-stream key"]]}
+];
+
+function epBlock(e){
+  const exNames=Object.keys(e.examples);
+  const fieldsRows=e.fields.map(f=>`<tr><td><code>${f[0]}</code></td><td class="mut">${f[1]}</td><td>${f[2]}</td></tr>`).join("");
+  const tag = e.sync?'<span class="pill" style="background:var(--grnbg);color:#15803d;border-color:#bbf7d0">🟢 sync · inline</span>':'<span class="pill" style="background:var(--blubg);color:#1d4ed8;border-color:#bfdbfe">🔵 async · id + poll</span>';
+  const pollBtn = e.poll?`<button class="btn g" onclick="pollEp('${e.id}')">Poll /:id ↻</button>`:'';
+  return `<section id="${e.id}">
+    <h2>${e.title}</h2>
+    <div>${tag}</div>
+    <div class="ep"><span class="v">${e.m}</span> https://api.firecrawl.dev${e.path}</div>
+    <p class="lede" style="font-size:16px">${e.blurb}</p>
+    <div class="row"><span class="mut" style="font-size:13px">Example:</span>
+      <select onchange="loadEx('${e.id}',this.value)">${exNames.map(n=>`<option>${n}</option>`).join("")}</select></div>
+    <div class="g2">
+      <div><div class="lbl">Request body (edit me)</div><textarea id="req-${e.id}"></textarea>
+        <div class="row"><button class="btn" onclick="runEp('${e.id}')">Run ▶</button>${pollBtn}<span id="err-${e.id}" style="color:#b91c1c;font-size:12.5px"></span></div></div>
+      <div><div class="lbl">Response</div><div class="out" id="res-${e.id}" style="min-height:150px"><pre class="mut">press Run ▶</pre></div></div>
+    </div>
+    <h3>Key fields</h3><div class="tbl"><table><thead><tr><th>field</th><th>type</th><th>what it does</th></tr></thead><tbody>${fieldsRows}</tbody></table></div>
+  </section>`;
+}
+document.getElementById("endpoints").innerHTML=EP.map(epBlock).join("");
+const EPM={};EP.forEach(e=>EPM[e.id]=e);
+function loadEx(id,name){document.getElementById("req-"+id).value=JSON.stringify(EPM[id].examples[name],null,2);}
+EP.forEach(e=>loadEx(e.id,Object.keys(e.examples)[0]));
+function runEp(id){
+  const e=EPM[id],err=document.getElementById("err-"+id);err.textContent="";
+  let body;try{body=JSON.parse(document.getElementById("req-"+id).value);}catch(ex){err.textContent="⚠ "+ex.message;return;}
+  // if this endpoint takes a json-format schema, fill the sample from it
+  let resp=JSON.parse(JSON.stringify(e.resp));
+  try{
+    const jf=(body.formats||[]).find(f=>f&&f.type==="json");
+    if(jf&&jf.schema){stri=0;resp.data=resp.data||{};resp.data.json=sampleFromSchema(jf.schema);}
+    if(id==="extract"&&body.schema){stri=0;if(e.poll)e._dynData=sampleFromSchema(body.schema);}
+  }catch(_){}
+  show("res-"+id,resp);
+  if(e.poll){const pb=document.querySelector(`#${id} ~ * , #res-${id}`);}
+}
+function pollEp(id){
+  const e=EPM[id];if(!e.poll)return;
+  let poll=JSON.parse(JSON.stringify(e.poll));
+  if(id==="extract"&&e._dynData)poll.data=e._dynData;
+  show("res-"+id,poll);
+}
+
+/* ---------- scroll-spy ---------- */
+const links=[...document.querySelectorAll("#nav a")];
+const secs=links.map(a=>document.querySelector(a.getAttribute("href")));
+function spy(){const y=window.scrollY+120;let cur=secs[0];secs.forEach(s=>{if(s&&s.offsetTop<=y)cur=s;});links.forEach(a=>a.classList.toggle("cur",a.getAttribute("href")==="#"+(cur&&cur.id)));}
+window.addEventListener("scroll",spy);spy();
+</script>
+</body></html>

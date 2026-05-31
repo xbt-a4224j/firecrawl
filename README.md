@@ -17,6 +17,23 @@
 | **scrape-quality** | LLM-readiness score for a scrape (`grade(doc)`) | [`scrape-quality`](https://github.com/xbt-a4224j/firecrawl/tree/scrape-quality/examples/scrape-quality) | `pnpm grade <url>` |
 | **Zod v4 fix** (issue 3300) | v4 schema silently dropped → empty extraction | [`fix/3300-zod-scrape-schema`](https://github.com/xbt-a4224j/firecrawl/tree/fix/3300-zod-scrape-schema) | `npx jest scrape-json-schema` |
 | **glue fix** (issue 3583) | adjacent `<button>`/`<label>` glued in HTML→md | [`fix/3583-inline-glue`](https://github.com/xbt-a4224j/firecrawl/tree/fix/3583-inline-glue) | `npx jest html-to-markdown -t "issue 3583"` |
+| **🎮 API playground** | interactive, no-key explainer for every v2 endpoint + a Schema Lab + a sync-vs-async walkthrough | this branch (`playground.html`) | **[▶ open it live](https://raw.githack.com/xbt-a4224j/firecrawl/portfolio/playground.html)** |
+
+---
+
+## The playground
+
+A self-contained, **no-API-key** playground I built to internalize the v2 surface — and make it teachable.
+**[▶ Open it live](https://raw.githack.com/xbt-a4224j/firecrawl/portfolio/playground.html)** (renders straight
+from this branch; or clone and open `playground.html`).
+
+- **Every endpoint** — scrape / map / search / crawl / batch / extract / agent / monitor — with editable
+  request bodies and realistic responses, plus an annotated table of every key parameter.
+- **A Schema Lab** — edit a JSON Schema, press *Extract*, and see the structured output it produces; it also
+  walks the **Zod v4 → JSON Schema #3300 trap** that the fix above resolves.
+- **A sync-vs-async explainer** — step through `/scrape` returning a `Document` inline vs `/extract` minting a
+  `uuidv7`, saving `status:"processing"` to Redis, and handing back an `id` you poll — grounded in the real
+  `extractController`.
 
 ---
 
