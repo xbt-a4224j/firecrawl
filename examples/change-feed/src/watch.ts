@@ -36,10 +36,17 @@ export interface WatchOptions {
 }
 
 export const DEFAULT_PROMPT =
-  "Compare the previous and current version of this page. Respond with a JSON object: " +
-  '{ "summary": a single plain-English sentence describing what MEANINGFULLY changed (or "no ' +
-  'meaningful change"), "significant": true only if real content changed — false for vote counts, ' +
-  "timestamps, view counters, reordering, ads, or boilerplate churn }.";
+  "You decide whether a webpage changed in a way a human watcher would care about. Compare the " +
+  "previous and current version. Respond with a JSON object: " +
+  '{ "summary": one plain-English sentence on what changed (or "no meaningful change"), ' +
+  '"significant": a boolean }. ' +
+  "Set significant=FALSE when the ONLY differences are churn — vote/point/comment counts, view or " +
+  'like counters, timestamps or relative times ("1 hour ago"), reordering, rotating ads, or ' +
+  "session/tracking tokens — even though those are technically text edits. " +
+  "Set significant=TRUE when the substantive meaning changed. In particular, ANY change to a price, " +
+  "dollar or currency amount, plan/tier cost, or stock/crypto quote is ALWAYS significant, no matter " +
+  "how small — report the old and new value. Likewise an added/removed/reworded headline, title, " +
+  "product, or list item, a policy/terms wording change, or an availability/stock/status change.";
 
 /** Pull a clean { summary, significant } out of whatever shape the LLM returned. */
 function normalize(json: unknown): { summary: string | null; significant: boolean } {

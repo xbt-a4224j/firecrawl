@@ -51,7 +51,8 @@ async function main(): Promise<void> {
   const scrape = async (url: string, options: Record<string, unknown>) =>
     (await fc.scrape(url, options)) as unknown as ChangeDoc;
 
-  console.log(`\n📡 change-feed — checking ${urls.length} page(s)\n`);
+  const checkedAt = new Date().toISOString().replace(/\.\d+Z$/, " UTC").replace("T", " ");
+  console.log(`\n📡 change-feed — checking ${urls.length} page(s) · ${checkedAt}\n`);
   const before = await remainingCredits(fc);
   const items = await watchUrls(urls, { scrape });
   const after = await remainingCredits(fc);

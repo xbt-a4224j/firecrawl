@@ -1,0 +1,11 @@
+# signal-vs-noise demo — 3 real public pages, one per color.
+# Re-run and the change-feed tells meaningful change apart from churn.
+
+# 🔴 expected: a live market price — moves every check, a real & verifiable change
+https://www.coingecko.com/en/coins/bitcoin
+
+# 🟡 expected: a high-churn feed — vote counts / reordering tick constantly, but it's NOISE
+https://news.ycombinator.com
+
+# ⚪ expected: a stable reference page — real content, but nothing meaningful changed
+https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
