@@ -124,6 +124,17 @@ export async function parseMarkdown(
   var turndownPluginGfm = require("joplin-turndown-plugin-gfm");
 
   const turndownService = new TurndownService();
+  // issue 3583: <button>/<label> (used by CMP cookie widgets) are not block elements, so Turndown
+  // renders them inline and glues adjacent ones into one token ("FunktionalFunktional"), corrupting
+  // the markdown for downstream LLMs. Treat them as block-level so siblings separate. Genuine inline
+  // formatting (<b>, <strong>, <span>) is untouched, so words like "Firecrawl" stay one token.
+  turndownService.addRule("blockInteractive", {
+    filter: ["button", "label"],
+    replacement: function (content) {
+      const inner = content.trim();
+      return inner ? "\n\n" + inner + "\n\n" : "";
+    },
+  });
   turndownService.addRule("inlineLink", {
     filter: function (node, options) {
       return (

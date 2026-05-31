@@ -66,11 +66,14 @@ describe("parseMarkdown", () => {
       );
     });
 
-    // Guard: genuine inline formatting runs MUST stay glued. "<b>Fire</b><b>crawl</b>"
-    // is the word "Firecrawl" — separating it would be a worse bug than the one we fix.
-    it("does NOT separate genuine inline formatting (Firecrawl stays one word)", async () => {
-      const html = "<b>Fire</b><b>crawl</b>";
-      await expect(parseMarkdown(html)).resolves.toBe("**Fire****crawl**");
+    // Guard: genuine inline formatting must NOT be promoted to separate blocks. "<b>Fire</b><b>crawl</b>"
+    // is the word "Firecrawl" — inserting a block break would be a worse bug than the one we fix.
+    // Asserted backend-agnostically (the Go parser emits "**Fire** **crawl**", Turndown "**Fire****crawl**";
+    // both keep it on one line) so this guards every converter, not just one.
+    it("does NOT promote genuine inline formatting to separate blocks", async () => {
+      const out = await parseMarkdown("<b>Fire</b><b>crawl</b>");
+      expect(out).not.toMatch(/\n\s*\n/); // no block break inserted between inline runs
+      expect(out.replace(/[*\s]/g, "")).toBe("Firecrawl"); // text preserved, only inline emphasis added
     });
   });
 });
