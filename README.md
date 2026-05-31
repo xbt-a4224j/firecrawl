@@ -27,7 +27,9 @@ A self-contained, **no-API-key** playground I built to internalize the v2 surfac
 Clone this branch and open `playground.html` in any browser — nothing calls the network, every response is a
 realistic sample, so you can explore the request/response *shapes* safely. Here's the full tour:
 
-![Walkthrough of the Firecrawl playground — stepping through the sync-vs-async explainer, the Schema Lab (Zod v4 → JSON Schema), and every v2 endpoint, running each call and reading the annotated request/response samples](assets/playground-demo.gif)
+https://github.com/user-attachments/assets/6e121ac5-a5b8-4ed1-ada7-8723c3fde015
+
+*Player not loading? [Watch the GIF](assets/playground-demo.gif) · or clone this branch and open `playground.html`.*
 
 - **Every endpoint** — scrape / map / search / crawl / batch / extract / agent / monitor — with editable
   request bodies and realistic responses, plus an annotated table of every key parameter.
