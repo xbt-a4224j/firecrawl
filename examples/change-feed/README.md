@@ -6,6 +6,15 @@ an LLM tells you **what meaningfully changed and why it matters** — not a raw 
 
 Built on Firecrawl's **`changeTracking`** — a powerful hosted feature with (until now) zero examples.
 
+## See it live
+
+![change-feed live monitor: a price page goes red, Hacker News stays amber-muted, Wikipedia stays green](media/live-monitor.gif)
+
+Three real public pages, monitored on an interval: a **price page → 🔴** (caught a real
+`$74,092 → $74,081` move), **Hacker News → 🟡** (vote-count churn, correctly muted as noise), a
+**Wikipedia article → ⚪** (stable). Each lane shows the server baseline timestamp it diffed against and
+the credits the ping cost.
+
 ## Why this is more than "scrape twice and diff"
 
 Firecrawl stores the previous scrape of each page for you, server-side, and diffs against it
@@ -62,15 +71,17 @@ pnpm watch https://example.com/pricing --diff    # 2. re-check
 It flagged the **price** as significant and muted the surrounding timestamp churn — that's the point:
 *meaningful* changes, not raw diffs.
 
-## Dashboard
+## Live monitor (the dashboard above)
 
 ```bash
 export FIRECRAWL_API_KEY=fc-...
 pnpm dev          # → http://localhost:5173
 ```
 
-Paste URLs → **Check** → a live feed: each page is a card (🔴 real change / 🟡 minor / ⚪ no change / 🆕
-new), with the LLM "what changed" and an expandable diff, plus the credits the run used. Your key stays
+One **swimlane per site**. Press **Start** and it pings every *N* seconds; each lane shows its current
+status (🔴 real / 🟡 minor / ⚪ none / 🆕 new), **Last change**, **Last checked**, the **Baseline (DB)**
+timestamp it's diffing against (Firecrawl's server-side store, surfaced via `previousScrapeAt`), and a
+running **change-log**. The control bar shows the live credit cost per ping. Your key stays
 **server-side** (a tiny `/api/check` route holds it) — the browser never sees it.
 
 Schedule the CLI (cron / GitHub Action) to get a recurring "what changed across my watchlist" digest.
@@ -79,12 +90,13 @@ Schedule the CLI (cron / GitHub Action) to get a recurring "what changed across 
 
 - `src/watch.ts` — `watchUrls(urls, { scrape })`: maps each URL's `changeTracking` result into a feed
   item (`new`/`changed`/`same`/`removed`), with the LLM summary + diff. Per-URL isolation; pure +
-  unit-tested (the scrape fn is injected).
-- `src/format.ts` — renders the feed for the terminal.
+  unit-tested (the scrape fn is injected). The significance policy is one externalized, tunable prompt.
+- `src/format.ts` / `src/stats.ts` / `src/errors.ts` — terminal rendering, run stats, teaching errors.
 - `src/cli.ts` — wires the real Firecrawl cloud client and prints the feed.
+- `src/web/App.tsx` + `vite.config.ts` — the swimlane dashboard and the key-safe `/api/check` route.
 
 ```bash
-pnpm test        # 10 tests, no network (injected client)
+pnpm test        # 20 tests, no network (injected client)
 ```
 
 ## Notes
