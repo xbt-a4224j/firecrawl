@@ -1,0 +1,13 @@
+# change-feed watchlist — one URL per line. Pick LOW-CHURN, HIGH-SIGNAL pages:
+# pricing, terms of service, changelogs. They rarely change, so they barely touch
+# your quota — and when they DO change, it's real news. (Avoid news/social/HN: pure churn.)
+
+# --- pricing (catch price/plan changes) ---
+https://openai.com/api/pricing
+https://www.anthropic.com/pricing
+
+# --- changelogs / what's new ---
+https://docs.anthropic.com/en/release-notes/api
+
+# --- terms / policy (rare, high-importance) ---
+https://openai.com/policies/row-terms-of-use
