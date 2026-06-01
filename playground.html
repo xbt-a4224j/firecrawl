@@ -491,24 +491,19 @@ async function runSchema(){
   let s;try{s=JSON.parse(document.getElementById("schemaIn").value);}catch(e){err.textContent="⚠ "+e.message;return;}
   refreshTree();
   const url=((document.getElementById("schemaUrl")||{}).value||"https://firecrawl.dev").trim();
-  if(!fcKey()){ err.textContent="set your Firecrawl cloud key in the banner field ↑ — extraction runs on cloud"; }
-  else if(window.__LIVE!==false){
-    // structured extraction needs an LLM → Firecrawl cloud (direct; CORS is open).
-    document.getElementById("schemaOut").innerHTML='<div class="mut" style="font-size:12px">⏳ POST api.firecrawl.dev/v2/scrape (cloud) · the LLM is reading '+url+' …</div>';
-    try{
-      const t0=performance.now();
-      const r=await fetch(CLOUD_BASE+"/v2/scrape",{method:"POST",headers:cloudHeaders(),body:JSON.stringify({url:url,formats:[{type:"json",prompt:"Extract the fields described by the provided JSON schema.",schema:s}]}),signal:abortIn(60000)});
-      const txt=await r.text(), ms=Math.round(performance.now()-t0);
-      let j=null;try{j=JSON.parse(txt);}catch(_){}
-      if(r.ok&&j&&j.data&&j.data.json&&typeof j.data.json==="object"&&Object.keys(j.data.json).length){
-        const idv=j.data.metadata&&j.data.metadata.scrapeId;
-        document.getElementById("schemaOut").innerHTML=netBadge("cloud","POST","/v2/scrape",r.status,ms,txt.length,idv)+'<pre>'+color(JSON.stringify(j.data.json,null,2).slice(0,6000))+'</pre>';
-        return;
-      }
-      err.textContent="cloud → HTTP "+(j?r.status:"parse")+" · showing the expected shape";
-    }catch(ex){ err.textContent="cloud unreachable → showing the expected shape"; }
-  }
-  stri=0; document.getElementById("schemaOut").innerHTML='<div class="mut" style="font-size:11px;margin-bottom:5px">📋 <b>expected shape</b> — couldn’t reach the cloud extractor just now, so the structured fill is illustrative. On a live call this field returns real extracted data.</div><pre>'+color(JSON.stringify({json:sampleFromSchema(s)},null,2))+'</pre>';
+  const out=document.getElementById("schemaOut");
+  if(!fcKey()){ out.innerHTML='<div class="mut" style="font-size:12.5px">🔑 <b>☁️ REMOTE</b> — structured extraction runs an LLM on Firecrawl cloud. Paste your cloud key in the banner field ↑, then Extract.</div>'; return; }
+  // structured extraction needs an LLM → Firecrawl cloud (direct; CORS is open).
+  out.innerHTML='<div class="mut" style="font-size:12px">⏳ POST api.firecrawl.dev/v2/scrape (cloud) · the LLM is reading '+url+' …</div>';
+  try{
+    const t0=performance.now();
+    const r=await fetch(CLOUD_BASE+"/v2/scrape",{method:"POST",headers:cloudHeaders(),body:JSON.stringify({url:url,formats:[{type:"json",prompt:"Extract the fields described by the provided JSON schema.",schema:s}]}),signal:abortIn(60000)});
+    const txt=await r.text(), ms=Math.round(performance.now()-t0);
+    let j=null;try{j=JSON.parse(txt);}catch(_){}
+    const data=j&&j.data&&(j.data.json!==undefined?j.data.json:j.data);
+    const idv=j&&j.data&&j.data.metadata&&j.data.metadata.scrapeId;
+    out.innerHTML=netBadge("cloud","POST","/v2/scrape",r.status,ms,txt.length,idv)+'<pre>'+color(data!==undefined?JSON.stringify(data,null,2).slice(0,6000):(j?JSON.stringify(j,null,2).slice(0,4000):txt.slice(0,4000)))+'</pre>';
+  }catch(ex){ out.innerHTML=errBadge("cloud","POST","/v2/scrape",ex); }
 }
 document.getElementById("schemaIn").addEventListener("input",refreshTree);
 loadPreset("company");
@@ -654,53 +649,43 @@ function netBadge(kind,method,path,status,ms,bytes,idv){
   var css=cloud?"color:#3730a3;background:#eef2ff;border:1px solid #c7d2fe":"color:#166534;background:#f0fdf4;border:1px solid #bbf7d0";
   return '<div style="font-size:11px;margin-bottom:6px;font-family:var(--mono);border-radius:6px;padding:5px 9px;line-height:1.5;'+css+'">'+label+' &nbsp; '+method+' '+host+path+' &nbsp;·&nbsp; HTTP '+status+' &nbsp;·&nbsp; '+ms+'&nbsp;ms &nbsp;·&nbsp; '+bytes+'&nbsp;bytes'+(idv?' &nbsp;·&nbsp; id '+String(idv).slice(0,24):'')+'</div>';
 }
-function sampleHead(label){ return '<div class="mut" style="font-size:11px;margin-bottom:5px">📋 '+(label||'annotated sample')+' — local API didn’t round-trip (needs cloud engines / async workers)</div>'; }
+function errBadge(kind,method,path,ex){
+  var host=kind==="cloud"?"https://api.firecrawl.dev":"http://localhost:3002";
+  var why=(ex&&ex.name==="AbortError")?"timed out (45s)":("could not reach the server — "+((ex&&ex.message)||ex));
+  var hint=kind==="local"?"is your local self-host up on :3002? it powers /scrape + /map":"check your cloud key + connection";
+  return '<div style="font-size:11px;margin-bottom:6px;color:#b91c1c;font-family:var(--mono);background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:5px 9px;line-height:1.5">⚠️ <b>CALL FAILED</b> &nbsp; '+method+' '+host+path+' &nbsp;·&nbsp; '+why+'</div><div class="mut" style="font-size:12px">'+hint+'</div>';
+}
 async function runEp(id){
-  const e=EPM[id],err=document.getElementById("err-"+id);err.textContent="";
+  const e=EPM[id],err=document.getElementById("err-"+id),out=document.getElementById("res-"+id);err.textContent="";
   let body;try{body=JSON.parse(document.getElementById("req-"+id).value);}catch(ex){err.textContent="⚠ "+ex.message;return;}
-  // LIVE: route to local self-host, or Firecrawl cloud directly (CORS is open) per endpoint.
+  // Every Run is a genuine call — local self-host or Firecrawl cloud (CORS open). No canned fallback.
   const cloud=needsCloud(id,body), host=cloud?"cloud":"local", base=cloud?CLOUD_BASE:LOCAL_BASE, shown=cloud?"api.firecrawl.dev":"localhost:3002";
-  if(cloud && !fcKey()){ err.textContent="set your Firecrawl cloud key in the banner field ↑ to run cloud endpoints"; }
-  else if(window.__LIVE!==false){
-    document.getElementById("res-"+id).innerHTML='<div class="mut" style="font-size:12px">⏳ POST '+shown+e.path+(cloud?' (Firecrawl cloud)':' (local self-host)')+' …</div>';
-    try{
-      const t0=performance.now();
-      const r=await fetch(base+e.path,{method:"POST",headers:cloud?cloudHeaders():{"Content-Type":"application/json"},body:JSON.stringify(body),signal:abortIn(45000)});
-      const txt=await r.text(), ms=Math.round(performance.now()-t0);
-      let j=null; try{j=JSON.parse(txt);}catch(_){}
-      if(r.ok && j){
-        const idv=(j.data&&j.data.metadata&&j.data.metadata.scrapeId)||j.id||(j.data&&j.data.id);
-        e._liveId=j.id||(j.data&&j.data.id)||null;
-        document.getElementById("res-"+id).innerHTML=netBadge(host,"POST",e.path,r.status,ms,txt.length,idv)+'<pre>'+color(JSON.stringify(j,null,2).slice(0,6000))+'</pre>';
-        return;
-      }
-      err.textContent=shown+" → HTTP "+r.status+" · showing the sample shape";
-    }catch(ex){ err.textContent=shown+" unreachable → showing the sample shape"; }
-  }
-  let resp=JSON.parse(JSON.stringify(e.resp));
+  if(cloud && !fcKey()){ out.innerHTML='<div class="mut" style="font-size:12.5px">🔑 <b>☁️ REMOTE endpoint</b> — paste your Firecrawl cloud key in the banner field ↑, then Run.</div>'; return; }
+  out.innerHTML='<div class="mut" style="font-size:12px">⏳ POST '+shown+e.path+(cloud?' (Firecrawl cloud)':' (local self-host)')+' …</div>';
   try{
-    const jf=(body.formats||[]).find(f=>f&&f.type==="json");
-    if(jf&&jf.schema){stri=0;resp.data=resp.data||{};resp.data.json=sampleFromSchema(jf.schema);}
-    if(id==="extract"&&body.schema){stri=0;if(e.poll)e._dynData=sampleFromSchema(body.schema);}
-  }catch(_){}
-  document.getElementById("res-"+id).innerHTML=sampleHead()+'<pre>'+color(JSON.stringify(resp,null,2))+'</pre>';
+    const t0=performance.now();
+    const r=await fetch(base+e.path,{method:"POST",headers:cloud?cloudHeaders():{"Content-Type":"application/json"},body:JSON.stringify(body),signal:abortIn(45000)});
+    const txt=await r.text(), ms=Math.round(performance.now()-t0);
+    let j=null; try{j=JSON.parse(txt);}catch(_){}
+    const idv=j&&((j.data&&j.data.metadata&&j.data.metadata.scrapeId)||j.id||(j.data&&j.data.id));
+    if(j)e._liveId=j.id||(j.data&&j.data.id)||null;
+    // Show the REAL response at whatever status it returned — the badge's HTTP code tells the truth.
+    out.innerHTML=netBadge(host,"POST",e.path,r.status,ms,txt.length,idv)+'<pre>'+color(j?JSON.stringify(j,null,2).slice(0,6000):txt.slice(0,4000))+'</pre>';
+  }catch(ex){ out.innerHTML=errBadge(host,"POST",e.path,ex); }
 }
 async function pollEp(id){
-  const e=EPM[id];if(!e.poll)return;
+  const e=EPM[id],out=document.getElementById("res-"+id);if(!e.poll)return;
   const cloud=CLOUD_EP.has(id), host=cloud?"cloud":"local", base=cloud?CLOUD_BASE:LOCAL_BASE, shown=cloud?"api.firecrawl.dev":"localhost:3002";
-  if(window.__LIVE!==false && e._liveId){
-    document.getElementById("res-"+id).innerHTML='<div class="mut" style="font-size:12px">⏳ GET '+shown+e.path+'/'+String(e._liveId).slice(0,8)+'… …</div>';
-    try{
-      const t0=performance.now();
-      const r=await fetch(base+e.path+"/"+e._liveId,{method:"GET",headers:cloud?cloudHeaders():undefined,signal:abortIn(45000)});
-      const txt=await r.text(), ms=Math.round(performance.now()-t0);
-      let j=null; try{j=JSON.parse(txt);}catch(_){}
-      if(r.ok && j){ document.getElementById("res-"+id).innerHTML=netBadge(host,"GET",e.path+"/"+String(e._liveId).slice(0,12)+"…",r.status,ms,txt.length,j.status||"")+'<pre>'+color(JSON.stringify(j,null,2).slice(0,6000))+'</pre>'; return; }
-    }catch(ex){}
-  }
-  let poll=JSON.parse(JSON.stringify(e.poll));
-  if(id==="extract"&&e._dynData)poll.data=e._dynData;
-  document.getElementById("res-"+id).innerHTML=sampleHead('annotated sample (poll)')+'<pre>'+color(JSON.stringify(poll,null,2))+'</pre>';
+  if(!e._liveId){ out.innerHTML='<div class="mut" style="font-size:12.5px">↻ Run this endpoint first to mint an <code>id</code> — then Poll fetches its real status.</div>'; return; }
+  if(cloud && !fcKey()){ out.innerHTML='<div class="mut" style="font-size:12.5px">🔑 paste your cloud key in the banner field ↑ to poll.</div>'; return; }
+  out.innerHTML='<div class="mut" style="font-size:12px">⏳ GET '+shown+e.path+'/'+String(e._liveId).slice(0,8)+'… …</div>';
+  try{
+    const t0=performance.now();
+    const r=await fetch(base+e.path+"/"+e._liveId,{method:"GET",headers:cloud?cloudHeaders():undefined,signal:abortIn(45000)});
+    const txt=await r.text(), ms=Math.round(performance.now()-t0);
+    let j=null; try{j=JSON.parse(txt);}catch(_){}
+    out.innerHTML=netBadge(host,"GET",e.path+"/"+String(e._liveId).slice(0,12)+"…",r.status,ms,txt.length,j&&(j.status||""))+'<pre>'+color(j?JSON.stringify(j,null,2).slice(0,6000):txt.slice(0,4000))+'</pre>';
+  }catch(ex){ out.innerHTML=errBadge(host,"GET",e.path,ex); }
 }
 
 /* ---------- Examples: scrape-quality grade(doc) ---------- */
