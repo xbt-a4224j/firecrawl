@@ -80,6 +80,7 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
 .chip.remote{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe}
 .chip.both{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
 .chip.browser{background:#f4f4f5;color:#3f3f46;border:1px solid #e4e4e7}
+.curlbox{background:#0d1117;color:#e6edf3;border-radius:8px;font-family:var(--mono);font-size:11.5px;line-height:1.5;padding:9px 11px;margin:2px 0 0;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow:auto}
 </style></head>
 <body>
 <nav id="nav"><div class="h"><b><span class="f">🔥</span> Firecrawl playground</b><div class="s">learn the endpoints by toying</div></div>
@@ -538,58 +539,50 @@ const EP=[
   blurb:"The flagship. One page in, clean markdown (or structured JSON, html, screenshot, links) out — <b>inline, synchronous</b>.",
   examples:{
     "markdown (default)":{url:"https://firecrawl.dev"},
-    "main content + screenshot":{url:"https://news.ycombinator.com",formats:["markdown","screenshot"],onlyMainContent:true},
-    "structured json":{url:"https://example.com/pricing",formats:[{type:"json",prompt:"Get the pricing tiers",schema:{type:"object",properties:{tiers:{type:"array",items:{type:"object",properties:{name:{type:"string"},price:{type:"number"}}}}}}}]},
-    "actions (infinite scroll)":{url:"https://example.com/feed",actions:[{type:"scroll",direction:"down"},{type:"wait",milliseconds:1500},{type:"scrape"}]}
+    "screenshot + main content":{url:"https://news.ycombinator.com",formats:["markdown","screenshot"],onlyMainContent:true},
+    "structured json":{url:"https://www.firecrawl.dev/pricing",formats:[{type:"json",prompt:"Extract the pricing tiers and their monthly prices",schema:{type:"object",properties:{tiers:{type:"array",items:{type:"object",properties:{name:{type:"string"},price_per_month:{type:"number"}}}}}}}]},
+    "actions (scroll + wait)":{url:"https://news.ycombinator.com",actions:[{type:"scroll",direction:"down"},{type:"wait",milliseconds:1500},{type:"scrape"}]}
   },
-  resp:{success:true,data:{markdown:"# Firecrawl\nThe eyes for AGI…",metadata:{title:"Firecrawl",statusCode:200,sourceURL:"https://firecrawl.dev"},cacheState:"hit"}},
   fields:[["url","string","the page to scrape (required)"],["formats","string[] | object[]","what to return: markdown (default), html, rawHtml, links, screenshot, summary, {type:'json',schema}, {type:'changeTracking'}"],["onlyMainContent","boolean","strip nav/footer/cookie boilerplate (default true)"],["actions","Action[]","browser steps before capture: wait/click/scroll/write/press/executeJavascript/screenshot/scrape/pdf"],["maxAge","number","cache freshness window in ms; omit → learned per-domain window"],["proxy","'basic'|'stealth'|'auto'","escalate for anti-bot sites"],["waitFor","number","ms to wait for JS before capture"]]},
 
  {id:"map",m:"POST",path:"/v2/map",sync:true,title:"/map — discover every URL on a site, fast",
   blurb:"Returns a flat list of URLs <b>inline</b>. Hits 3 sources in parallel — sitemap, Firecrawl's URL index, and a cached <code>site:</code> SERP query — and merges them. No crawling, seconds not minutes.",
   examples:{"all urls":{url:"https://docs.firecrawl.dev"},"filtered by search":{url:"https://docs.firecrawl.dev",search:"changeTracking"}},
-  resp:{success:true,links:["https://docs.firecrawl.dev/introduction","https://docs.firecrawl.dev/features/scrape","https://docs.firecrawl.dev/features/changeTracking","…"]},
   fields:[["url","string","the site to map (required)"],["search","string","rank/filter URLs by relevance to this term"],["limit","number","max URLs to return"],["sitemapOnly","boolean","trust only the declared sitemap"]]},
 
  {id:"search",m:"POST",path:"/v2/search",sync:true,title:"/search — web search + full page content",
   blurb:"SERP results <b>plus</b> the scraped content of each — search and scrape in one call. Sources: web, news, images.",
   examples:{"basic":{query:"firecrawl alternatives",limit:5},"with scraping":{query:"best web scraping API 2026",limit:3,scrapeOptions:{formats:["markdown"]}}},
-  resp:{success:true,data:{web:[{url:"https://firecrawl.dev",title:"Firecrawl",description:"The API to scrape the web…",markdown:"# Firecrawl…"}]}},
   fields:[["query","string","the search query (required)"],["limit","number","max results (max 10)"],["sources","('web'|'news'|'images')[]","which result types"],["scrapeOptions","object","if set, each result is scraped with these options"]]},
 
  {id:"crawl",m:"POST",path:"/v2/crawl",sync:false,title:"/crawl — scrape a whole site (async)",
   blurb:"BFS over a site's link graph. <b>Async</b>: returns an <code>id</code> in &lt;1s, you poll <code>GET /v2/crawl/:id</code> for status + the pages as they finish.",
-  examples:{"basic":{url:"https://docs.firecrawl.dev",limit:50},"scoped":{url:"https://example.com",includePaths:["/blog/.*"],excludePaths:["/tags/.*"],maxDepth:3,limit:100}},
-  resp:{success:true,id:"a1b2c3d4-…",url:"https://api.firecrawl.dev/v2/crawl/a1b2c3d4-…"},
-  poll:{status:"scraping",total:50,completed:23,creditsUsed:23,next:"https://api.firecrawl.dev/v2/crawl/a1b2c3d4-…?skip=23",data:[{markdown:"# Page…",metadata:{sourceURL:"https://docs.firecrawl.dev/x"}}]},
+  examples:{"basic":{url:"https://docs.firecrawl.dev",limit:5},"scoped":{url:"https://docs.firecrawl.dev",includePaths:["/features/.*"],maxDepth:2,limit:10}},
+  poll:true,
   fields:[["url","string","the seed URL (required)"],["limit","number","max pages to crawl"],["maxDepth","number","how many link-hops from the seed"],["includePaths/excludePaths","string[]","regex path filters"],["allowBackwardLinks","boolean","follow links to parent paths"],["scrapeOptions","object","how to scrape each page (formats, etc.)"]]},
 
  {id:"batch",m:"POST",path:"/v2/batch/scrape",sync:false,title:"/batch/scrape — many known URLs (async)",
   blurb:"Same async spine as crawl, but you supply the URL list yourself (no discovery). Returns an <code>id</code>, poll for results. The status endpoint pages results with a cursor + a 10 MiB cap so one poll is never unbounded.",
-  examples:{"basic":{urls:["https://a.com","https://b.com","https://c.com"],formats:["markdown"]}},
-  resp:{success:true,id:"b4tch-…",url:"https://api.firecrawl.dev/v2/batch/scrape/b4tch-…"},
-  poll:{status:"completed",total:3,completed:3,data:[{markdown:"# A…"},{markdown:"# B…"},{markdown:"# C…"}]},
+  examples:{"basic":{urls:["https://firecrawl.dev","https://docs.firecrawl.dev","https://news.ycombinator.com"],formats:["markdown"]}},
+  poll:true,
   fields:[["urls","string[]","the URLs to scrape (required)"],["formats","string[]","what to return for each"],["ignoreInvalidURLs","boolean","skip bad URLs instead of erroring"]]},
 
  {id:"extract",m:"POST",path:"/v2/extract",sync:false,title:"/extract — schema over many pages (async)",
   blurb:"Hand it URLs + a schema (or just a prompt) and an LLM extracts structured data across all of them. <b>Async</b> (LLM × many pages): returns an <code>id</code> in &lt;1s → poll <code>GET /v2/extract/:id</code> until <code>status:'completed'</code>.",
   examples:{"schema":{urls:["https://firecrawl.dev"],prompt:"Extract the product details",schema:{type:"object",properties:{name:{type:"string"},tagline:{type:"string"},endpoints:{type:"array",items:{type:"string"}}}}},"prompt only + web search":{urls:["https://firecrawl.dev"],prompt:"What does this company do and who are its competitors?",enableWebSearch:true}},
-  resp:{success:true,id:"0192f3a1-7c4e-7abc-…",urlTrace:[]},
-  poll:{success:true,status:"completed",data:{name:"Firecrawl",tagline:"The eyes for AGI",endpoints:["scrape","crawl","map","search","extract"]}},
+  poll:true,
   fields:[["urls","string[]","pages to extract from"],["prompt","string","what to pull (free-form if no schema)"],["schema","JSON Schema","the structured shape to return"],["systemPrompt","string","steer the extractor's behavior"],["enableWebSearch","boolean","let it follow external links / search to fill gaps"],["allowExternalLinks","boolean","same idea — go beyond the given URLs"],["agent","object","⚠️ legacy FIRE-1 path; agent.model:'v3-beta' is REJECTED → use /agent"]]},
 
  {id:"agent",m:"POST",path:"/v2/agent",sync:false,title:"/agent — autonomous web actions (FIRE-1 / v3)",
   blurb:"Describe a goal in plain language; the agent navigates, clicks, fills, and extracts on its own. This is where v3 autonomy graduated to — the thing <code>/extract</code> sends you to when you ask for <code>v3-beta</code>. <b>Async</b>.",
-  examples:{"goal":{prompt:"Go to the pricing page, select the annual plan, and return the total for 10 seats",url:"https://example.com"}},
-  resp:{success:true,id:"agent-…"},
-  poll:{success:true,status:"completed",data:{result:"Annual, 10 seats = $2,400/yr",steps:["navigated to /pricing","toggled annual","set seats=10","read total"]}},
+  examples:{"goal":{prompt:"Find the cheapest paid plan and return its name and monthly price",url:"https://www.firecrawl.dev/pricing"}},
+  poll:true,
   fields:[["prompt","string","the goal, in natural language"],["url","string","where to start"],["model","string","the agent model (v3 line)"]]},
 
  {id:"monitor",m:"POST",path:"/v2/monitor",sync:false,title:"/monitor — get told when the web changes",
-  blurb:"Schedules recurring change-tracking on URLs and notifies you on meaningful changes. <code>goal</code> + <code>judge_enabled</code> add an LLM judge that labels each diff meaningful-vs-noise — the server-side version of the change-feed's <code>significant</code> flag. <b>My change-feed example runs on this endpoint</b> (create → on-demand <code>/run</code> → read per-URL pages).",
-  examples:{"with goal+judge":{url:"https://example.com/pricing",goal:"alert me only when prices change",judge_enabled:true}},
-  resp:{success:true,id:"mon-…",url:"https://example.com/pricing",goal:"alert me only when prices change",judgeEnabled:true},
-  fields:[["url","string","page to watch"],["goal","string","plain-language 'what counts as meaningful'"],["judge_enabled","boolean","turn on the LLM judge (+1 credit per judged changed page)"],["tag","string","independent watch-stream key"]]}
+  blurb:"Schedules recurring change-tracking on URLs and notifies you on meaningful changes. <code>goal</code> + <code>judge_enabled</code> add an LLM judge that labels each diff meaningful-vs-noise — the server-side version of the change-feed's <code>significant</code> flag. <b>My change-feed example runs on this endpoint</b> (create → on-demand <code>/run</code> → read per-URL pages). <b>Heads-up:</b> each Run here creates a <i>real</i> monitor on your account — delete it from the dashboard after.",
+  examples:{"create (price watch)":{name:"price watch",schedule:{cron:"0 9 * * *",timezone:"UTC"},notification:{email:{enabled:false}},targets:[{type:"scrape",urls:["https://www.firecrawl.dev/pricing"]}],goal:"alert me only when prices change",judgeEnabled:true}},
+  fields:[["name","string","monitor name (required)"],["schedule","{cron,timezone}","when to check, as cron (required)"],["targets","Target[]","[{type:'scrape',urls:[…]}] — what to watch (required)"],["notification","{email:{…}}","how to notify (required; <code>email.enabled</code> defaults false)"],["goal","string","plain-language 'what counts as meaningful'"],["judgeEnabled","boolean","turn on the LLM judge (+1 credit per judged changed page)"]]}
 ];
 
 const CODEREF={
@@ -615,13 +608,14 @@ function epBlock(e){
   return `<section id="${e.id}">
     <h2>${e.title}${epChip(e.id)}</h2>
     <div>${tag}</div>
-    <div class="ep"><span class="v">${e.m}</span> https://api.firecrawl.dev${e.path}</div>
+    <div class="ep" id="ep-${e.id}"><span class="v">${e.m}</span> ${e.path}</div>
     <div class="card" style="margin:10px 0;padding:11px 14px"><div class="lbl">📁 in the code</div><div class="mono" style="font-size:12.5px;color:#c2410c;margin-top:2px">apps/api/src/${CODEREF[e.id][0]}</div><p class="mut" style="margin:.35em 0 0;font-size:13px">${CODEREF[e.id][1]}</p></div>
     <p class="lede" style="font-size:16px">${e.blurb}</p>
     <div class="row"><span class="mut" style="font-size:13px">Example:</span>
       <select onchange="loadEx('${e.id}',this.value)">${exNames.map(n=>`<option>${n}</option>`).join("")}</select></div>
     <div class="g2">
-      <div><div class="lbl">Request body — the JSON sent over the wire</div><textarea id="req-${e.id}"></textarea>
+      <div><div class="lbl">the exact call — copy-paste this</div><pre id="curl-${e.id}" class="curlbox" aria-label="exact curl command"></pre>
+        <div class="lbl" style="margin-top:8px">Request body — editable, sent verbatim</div><textarea id="req-${e.id}" oninput="updCurl('${e.id}')"></textarea>
         <div class="row"><button class="btn" onclick="runEp('${e.id}')">Run ▶</button>${pollBtn}<span id="err-${e.id}" style="color:#b91c1c;font-size:12.5px"></span></div></div>
       <div><div class="lbl">Response</div><div class="out" id="res-${e.id}" style="min-height:150px"><pre class="mut">press Run ▶</pre></div></div>
     </div>
@@ -630,8 +624,24 @@ function epBlock(e){
 }
 document.getElementById("endpoints").innerHTML=EP.map(epBlock).join("");
 const EPM={};EP.forEach(e=>EPM[e.id]=e);
-function loadEx(id,name){document.getElementById("req-"+id).value=JSON.stringify(EPM[id].examples[name],null,2);}
-EP.forEach(e=>loadEx(e.id,Object.keys(e.examples)[0]));
+// Build the exact wire call as curl — resolves the REAL host (local vs cloud) from the current body.
+function curlFor(id){
+  const e=EPM[id], ta=document.getElementById("req-"+id);
+  const raw=ta?ta.value:"{}"; let body=null; try{body=JSON.parse(raw);}catch(_){}
+  const cloud=body?needsCloud(id,body):CLOUD_EP.has(id);
+  const url=(cloud?"https://api.firecrawl.dev":"http://localhost:3002")+e.path;
+  let compact; try{compact=JSON.stringify(JSON.parse(raw));}catch(_){compact=raw.replace(/\s+/g," ").trim();}
+  const lines=["curl -X "+e.m+" "+url,"  -H 'Content-Type: application/json'"];
+  if(cloud)lines.push("  -H 'Authorization: Bearer YOUR_FC_KEY'");
+  lines.push("  -d '"+compact+"'");
+  return {cloud, url, curl:lines.join(" \\\n")};
+}
+function updCurl(id){
+  const c=curlFor(id);
+  const cb=document.getElementById("curl-"+id); if(cb)cb.textContent=c.curl;
+  const ep=document.getElementById("ep-"+id); if(ep)ep.innerHTML='<span class="v">'+EPM[id].m+'</span> '+c.url+(c.cloud?' <span class="chip remote">☁️ REMOTE</span>':' <span class="chip local">🟢 LOCAL</span>');
+}
+function loadEx(id,name){document.getElementById("req-"+id).value=JSON.stringify(EPM[id].examples[name],null,2);updCurl(id);}
 function abortIn(ms){var c=new AbortController();setTimeout(function(){c.abort();},ms);return c.signal;}
 // Routing: a couple of endpoints run on my local self-host (proof the stack is up); the rest hit
 // Firecrawl cloud directly (its CORS is open, so the browser can call it). Any json/LLM-extraction
@@ -641,7 +651,13 @@ const CLOUD_EP=new Set(["crawl","batch","search","extract","agent","monitor"]);
 const CLOUD_BASE="https://api.firecrawl.dev", LOCAL_BASE="http://localhost:3002";
 function fcKey(){ return (localStorage.getItem("fc_key")||"").trim(); }
 function cloudHeaders(){ var k=fcKey(); var h={"Content-Type":"application/json"}; if(k)h["Authorization"]="Bearer "+k; return h; }
-function needsCloud(id,body){ if(CLOUD_EP.has(id))return true; var f=body&&body.formats; return Array.isArray(f)&&f.some(function(x){return x&&x.type==="json";}); }
+function needsCloud(id,body){
+  if(CLOUD_EP.has(id))return true;
+  if(body&&Array.isArray(body.actions)&&body.actions.length)return true; // browser steps → cloud
+  var f=body&&body.formats;
+  return Array.isArray(f)&&f.some(function(x){return x&&(x.type==="json"||x==="screenshot"||x.type==="screenshot");}); // LLM or browser render → cloud
+}
+EP.forEach(e=>loadEx(e.id,Object.keys(e.examples)[0])); // init bodies + curl — after CLOUD_EP/needsCloud are defined
 function netBadge(kind,method,path,status,ms,bytes,idv){
   var cloud=kind==="cloud";
   var host=cloud?"https://api.firecrawl.dev":"http://localhost:3002";
