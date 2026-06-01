@@ -140,8 +140,11 @@ function garbled(md: string): Finding | null {
   return null;
 }
 
-// Strong = unambiguous interstitial copy (fires alone). Weak = terms a real article might use
-// (only fire if corroborated by very short content) — so a blog *about* Cloudflare isn't flagged.
+// Only unambiguous interstitial copy fires. Deliberately NOT matching bare brand/error/product
+// terms ("cloudflare", "captcha", "access denied", "ddos protection") — those incidentally appear
+// in real content and on error pages (a 404 linking blog.cloudflare.com/images/404.svg matched
+// "cloudflare"; the Wikipedia "Cloudflare" article says "DDoS protection"). Real walls carry one
+// of these phrases AND are tiny — see the length guard below.
 const BOT_STRONG = [
   "checking your browser",
   "verify you are human",
@@ -150,17 +153,16 @@ const BOT_STRONG = [
   "enable javascript and cookies",
   "attention required",
   "ray id",
-  "ddos protection",
 ];
-const BOT_WEAK = ["cloudflare", "captcha", "access denied"];
 
 /** SOFT_BOT_WALL — anti-bot interstitial returned with a 200. #2350, #495, #2413 (charged for it). */
 function softBotWall(md: string, html: string): Finding | null {
+  // An interstitial is by nature a near-contentless page: a few lines of wall chrome, not an
+  // article. So only short documents qualify — a long page mentioning these phrases is content
+  // ABOUT bot walls (e.g. the Wikipedia "Cloudflare" / "CAPTCHA" articles), not a wall itself.
+  if (md.trim().length > 1500) return null;
   const hay = (md + " " + html).toLowerCase();
-  const len = md.trim().length;
-  const strong = BOT_STRONG.find(p => hay.includes(p));
-  const weak = BOT_WEAK.find(p => hay.includes(p));
-  const matched = strong ?? (len < 300 ? weak : undefined);
+  const matched = BOT_STRONG.find(p => hay.includes(p));
   if (matched) {
     return {
       code: "SOFT_BOT_WALL",

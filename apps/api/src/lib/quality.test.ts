@@ -83,6 +83,30 @@ const CLOUDFLARE_ARTICLE: QualityInput = {
   html: "<article>...</article>",
 };
 
+// regression: a real 404 page whose body links blog.cloudflare.com/images/404.svg — the bare term
+// "cloudflare" must NOT trip SOFT_BOT_WALL (found by the live corpus run, 2026-06)
+const NOT_FOUND_404: QualityInput = {
+  markdown:
+    "Page not found\n\nSorry, we can't find the page you are looking for.\n\n" +
+    "Error Code: 404\n\n![](https://blog.cloudflare.com/images/404.svg)",
+};
+
+// regression: a LONG article that quotes real interstitial copy ("DDoS protection", "Attention
+// Required", "Ray ID", "checking your browser") must NOT be flagged — the live grid caught the
+// Wikipedia "Cloudflare" article (162KB) tripping on "ddos protection". An interstitial is tiny;
+// an article is not. (2026-06)
+const LONG_ARTICLE_ABOUT_BOT_WALLS: QualityInput = {
+  markdown: (
+    "# Cloudflare\n\nCloudflare, Inc. is an American company that provides content delivery " +
+    "network services, cloud cybersecurity, DDoS protection, and ICANN-accredited domain " +
+    "registration services. When a visitor is challenged, the block page is titled " +
+    '"Attention Required! | Cloudflare" and shows a Cloudflare Ray ID at the bottom. The classic ' +
+    'interstitial reads "Checking your browser before accessing the site." Researchers studying ' +
+    "anti-bot systems often quote this copy verbatim when explaining how DDoS protection and " +
+    "browser-integrity checks decide whether to verify you are human. "
+  ).repeat(4),
+};
+
 // a real long article with an ordinary footer → footer markers exist but content dominates → NOT boilerplate
 const ARTICLE_WITH_FOOTER: QualityInput = {
   markdown:
@@ -184,6 +208,17 @@ describe("quality() — negatives: no false positives on near-miss content", () 
 
   test("an article ABOUT Cloudflare/CAPTCHA is NOT flagged SOFT_BOT_WALL", () => {
     expect(codes(quality(CLOUDFLARE_ARTICLE))).not.toContain("SOFT_BOT_WALL");
+  });
+
+  test("a 404 page that incidentally links a cloudflare image is NOT flagged SOFT_BOT_WALL", () => {
+    expect(codes(quality(NOT_FOUND_404))).not.toContain("SOFT_BOT_WALL");
+  });
+
+  test("a long article that QUOTES interstitial copy is NOT flagged SOFT_BOT_WALL (length guard)", () => {
+    expect(LONG_ARTICLE_ABOUT_BOT_WALLS.markdown!.length).toBeGreaterThan(1500);
+    expect(codes(quality(LONG_ARTICLE_ABOUT_BOT_WALLS))).not.toContain(
+      "SOFT_BOT_WALL",
+    );
   });
 
   test("a real article with a normal footer is NOT flagged HIGH_BOILERPLATE", () => {
