@@ -46,9 +46,10 @@ https://github.com/user-attachments/assets/6e121ac5-a5b8-4ed1-ada7-8723c3fde015
 A change-monitor that runs on Firecrawl's **`/v2/monitor`** endpoint — the productized change API
 (server-side scheduling, diff storage, and the significance judge). It tells you what *meaningfully*
 changed — **🔴** real change, **🟡** churn (vote counts, timestamps), **⚪** stable — not a raw diff.
-The CLI is a **thin client over `/monitor`**; the underlying `changeTracking` primitive stays behind
-`--primitive` and powers the sync live dashboard. (Two layers, right tool for each — see the example's
-README.)
+The whole example — CLI and live dashboard — is a **thin client over `/monitor`**: create a monitor,
+trigger an on-demand check, read the per-URL results. The server owns scheduling, diff storage, and the
+judge; going all-in cut it from ~830 to ~650 lines, one path. (It's built on the `changeTracking`
+primitive — see the example's README.)
 
 ![change-feed live monitor: a price page goes red, Hacker News stays amber-muted, Wikipedia stays green](assets/change-feed-live-monitor.gif)
 
@@ -66,12 +67,11 @@ pnpm test                            # 20 tests, no network (injected scrape fn)
 ```
 
 **Senior signals:** knows the difference between the **primitive** (`changeTracking`, sync) and the
-**product** (`/monitor`, scheduled + server-judged) and uses the right one per job; the CLI is a thin
-client over `/monitor` so the scheduling, diff storage, and judge live server-side; both cores are
-dependency-injected (**33 offline tests**, 13 covering the `/monitor` path); signal-vs-noise is an
-*externalized, tunable prompt* (reused as the monitor's server `goal`); results carry the real server
-baseline (timestamp or scrape id) so they're verifiable, not spoofable; the key stays server-side behind
-`/api/check`.
+**product** (`/monitor`, scheduled + server-judged) and built on the product — so the scheduling, diff
+storage, and judge live server-side and the client shrank to one path; the `MonitorClient` is
+dependency-injected (**26 offline tests**, 13 covering the `/monitor` path); signal-vs-noise is an
+*externalized, tunable prompt* (shipped as the monitor's server `goal`); results carry the real server
+baseline (scrape id) so they're verifiable, not spoofable; the key stays server-side behind `/api/check`.
 
 ---
 
