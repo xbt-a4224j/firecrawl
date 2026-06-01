@@ -312,7 +312,7 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
 <section style="border-top:0;padding-bottom:6px"><h2>The endpoints</h2>
   <div class="call info"><span class="ico">🟢</span><p><b>Live mode</b> — <label style="cursor:pointer"><input type="checkbox" id="liveToggle" checked onchange="window.__LIVE=this.checked"> on</label>. <b>Every call here is real.</b> <code>/scrape</code> and <code>/map</code> hit my <b>local self-host</b> (<code>localhost:3002</code>) — proof the stack is up; everything else, plus any structured-<code>json</code> extraction, hits <b>Firecrawl cloud</b> directly. Every section carries a tag for where it runs, and each live result repeats it with status · latency · bytes · a unique <code>id</code>.</p>
   <div style="margin-top:7px;display:flex;gap:7px;flex-wrap:wrap;align-items:center"><span class="chip local">🟢 LOCAL</span><span class="mut" style="font-size:11.5px">my self-host (<code>localhost:3002</code>)</span><span class="chip remote">☁️ REMOTE</span><span class="mut" style="font-size:11.5px">Firecrawl cloud (<code>api.firecrawl.dev</code>)</span><span class="chip both">🟢☁️ BOTH</span><span class="mut" style="font-size:11.5px"><code>/scrape</code> — local markdown, remote <code>json</code></span><span class="chip browser">🖥️ IN-BROWSER</span><span class="mut" style="font-size:11.5px">runs in this page, no network</span></div>
-  <div style="margin-top:8px;display:flex;align-items:center;gap:7px;flex-wrap:wrap"><label for="fcKeyInput" style="font-size:12.5px"><b>Cloud key</b> (for ☁️ endpoints):</label><input type="password" id="fcKeyInput" placeholder="fc-…" autocomplete="off" oninput="localStorage.setItem('fc_key',this.value.trim())" onfocus="if(!this.value)this.value=localStorage.getItem('fc_key')||''" style="font-family:var(--mono);font-size:12px;padding:4px 8px;border:1px solid #c7d2fe;border-radius:5px;width:160px"><span class="mut" style="font-size:11px">stored only in this browser’s localStorage — never committed</span></div></div>
+  <div style="margin-top:8px;display:flex;align-items:center;gap:7px;flex-wrap:wrap"><label for="fcKeyInput" style="font-size:12.5px"><b>Cloud key</b> (for ☁️ endpoints):</label><input type="password" id="fcKeyInput" placeholder="fc-…" autocomplete="off" oninput="localStorage.setItem('fc_key',this.value.trim())" onfocus="if(!this.value)this.value=fcKey()||''" style="font-family:var(--mono);font-size:12px;padding:4px 8px;border:1px solid #c7d2fe;border-radius:5px;width:160px"><span class="mut" style="font-size:11px">stored only in this browser’s localStorage — never committed</span></div></div>
 </section>
 <div id="endpoints"></div>
 
@@ -540,9 +540,9 @@ const EP=[
 
  {id:"crawl",m:"POST",path:"/v2/crawl",sync:false,title:"/crawl — scrape a whole site (async)",
   blurb:"BFS over a site's link graph. <b>Async</b>: returns an <code>id</code> in &lt;1s, you poll <code>GET /v2/crawl/:id</code> for status + the pages as they finish.",
-  examples:{"basic":{url:"https://docs.firecrawl.dev",limit:5},"scoped":{url:"https://docs.firecrawl.dev",includePaths:["/features/.*"],maxDepth:2,limit:10}},
+  examples:{"basic":{url:"https://docs.firecrawl.dev",limit:5},"scoped":{url:"https://docs.firecrawl.dev",includePaths:["/features/.*"],maxDiscoveryDepth:2,limit:10}},
   poll:true,
-  fields:[["url","string","the seed URL (required)"],["limit","number","max pages to crawl"],["maxDepth","number","how many link-hops from the seed"],["includePaths/excludePaths","string[]","regex path filters"],["allowBackwardLinks","boolean","follow links to parent paths"],["scrapeOptions","object","how to scrape each page (formats, etc.)"]]},
+  fields:[["url","string","the seed URL (required)"],["limit","number","max pages to crawl"],["maxDiscoveryDepth","number","how many link-hops from the seed"],["includePaths/excludePaths","string[]","regex path filters"],["allowBackwardLinks","boolean","follow links to parent paths"],["scrapeOptions","object","how to scrape each page (formats, etc.)"]]},
 
  {id:"batch",m:"POST",path:"/v2/batch/scrape",sync:false,title:"/batch/scrape — many known URLs (async)",
   blurb:"Same async spine as crawl, but you supply the URL list yourself (no discovery). Returns an <code>id</code>, poll for results. The status endpoint pages results with a cursor + a 10 MiB cap so one poll is never unbounded.",
@@ -632,7 +632,7 @@ function abortIn(ms){var c=new AbortController();setTimeout(function(){c.abort()
 // browser's localStorage (set it in the banner field) — never hardcoded, never committed.
 const CLOUD_EP=new Set(["crawl","batch","search","extract","agent","monitor"]);
 const CLOUD_BASE="https://api.firecrawl.dev", LOCAL_BASE="http://localhost:3002";
-function fcKey(){ return (localStorage.getItem("fc_key")||"").trim(); }
+function fcKey(){ return (window.__FC_KEY||localStorage.getItem("fc_key")||"").trim(); }
 function cloudHeaders(){ var k=fcKey(); var h={"Content-Type":"application/json"}; if(k)h["Authorization"]="Bearer "+k; return h; }
 function needsCloud(id,body){
   if(CLOUD_EP.has(id))return true;
