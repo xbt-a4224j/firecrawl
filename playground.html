@@ -75,6 +75,11 @@ td code{font-size:12.5px;background:#f4f4f5;border:1px solid var(--line);border-
 .tree .ty{color:var(--or)}
 .note{font-size:12.5px;color:var(--mut);margin-top:6px}
 kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px}
+.chip{display:inline-block;font-size:10.5px;font-weight:700;font-family:var(--mono);padding:2px 8px;border-radius:999px;vertical-align:middle;margin-left:8px;letter-spacing:.02em;white-space:nowrap}
+.chip.local{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.chip.remote{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe}
+.chip.both{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.chip.browser{background:#f4f4f5;color:#3f3f46;border:1px solid #e4e4e7}
 </style></head>
 <body>
 <nav id="nav"><div class="h"><b><span class="f">🔥</span> Firecrawl playground</b><div class="s">learn the endpoints by toying</div></div>
@@ -111,7 +116,7 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
 
 <!-- ============ SYNC VS ASYNC ============ -->
 <section id="spine">
-  <h2>Sync vs async — the part that confused you</h2>
+  <h2>Sync vs async — inline <code>Document</code> vs <code>id</code> + poll<span class="chip browser" title="conceptual stepper — runs in this page, no network">🖥️ IN-BROWSER</span></h2>
   <p class="lede">This is the one thing to internalize. <b>Same company, two response styles.</b> Press <b>Send</b> on each lane and watch what comes back.</p>
 
   <div class="call n"><span class="i">🧩</span><p><b>Plain English:</b> "sync" = the HTTP connection stays open while Firecrawl does the work, and the finished data comes back in that one response. "async" = Firecrawl can't finish in one request (too slow), so it immediately says "started, here's your ticket number (<code>id</code>)" and you call back later to ask "done yet?" until it is. That callback-asking is <b>polling</b>.</p></div>
@@ -155,7 +160,7 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
 
 <!-- ============ SCHEMA LAB ============ -->
 <section id="schema">
-  <h2>Schema Lab ⭐ — structured extraction made tangible</h2>
+  <h2>Schema Lab ⭐ — structured extraction made tangible<span class="chip remote" title="LLM extraction runs on Firecrawl cloud">☁️ REMOTE</span></h2>
   <p class="lede">This is the thing to actually <em>get</em>. A <b>JSON Schema</b> is a description of the shape you want back. You hand it to Firecrawl, an LLM reads the page, and returns JSON matching that shape. Edit the schema on the left → press <b>Extract</b> → see the filled response on the right.</p>
 
   <div class="row"><span class="mut" style="font-size:13px">Load a preset:</span>
@@ -203,7 +208,7 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
 </section>
 
 <section id="bugfixes">
-  <h2>Bug fixes 🐞 — watch them break &amp; get fixed</h2>
+  <h2>Bug fixes 🐞 — watch them break &amp; get fixed<span class="chip browser" title="the demos below run in this page — no network call">🖥️ IN-BROWSER</span></h2>
   <p class="mut">Two real bugs I root-caused. Same species: a <b>200 that lies</b> — the call says success, the payload is silently wrong. <b>Heads-up: the demos below are illustrative reproductions</b> — a tiny in-browser converter that shows the behavior so you can see it; <b>no real Firecrawl code runs</b> (the page calls no network). The actual diffs, and the regression test that's the <i>real</i> before/after (red on <code>main</code> → green on the fix branch), are in <b>📋 the receipts</b> below.</p>
 
   <div class="card">
@@ -304,7 +309,8 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
 
 <!-- ============ ENDPOINTS (rendered by JS) ============ -->
 <section style="border-top:0;padding-bottom:6px"><h2>The endpoints</h2>
-  <div class="call info"><span class="ico">🟢</span><p><b>Live mode</b> — <label style="cursor:pointer"><input type="checkbox" id="liveToggle" checked onchange="window.__LIVE=this.checked"> on</label>. <b>Every call here is real.</b> <code>/scrape</code> and <code>/map</code> hit my <b>local self-host</b> (<code>localhost:3002</code>) — proof the stack is up; everything else, plus any structured-<code>json</code> extraction, hits <b>Firecrawl cloud</b> directly. Each result is badged <b style="color:#166534">🟢 LOCAL SELF-HOST</b> or <b style="color:#3730a3">☁️ FIRECRAWL CLOUD</b> — with status · latency · bytes · a unique <code>id</code> that changes every call.</p>
+  <div class="call info"><span class="ico">🟢</span><p><b>Live mode</b> — <label style="cursor:pointer"><input type="checkbox" id="liveToggle" checked onchange="window.__LIVE=this.checked"> on</label>. <b>Every call here is real.</b> <code>/scrape</code> and <code>/map</code> hit my <b>local self-host</b> (<code>localhost:3002</code>) — proof the stack is up; everything else, plus any structured-<code>json</code> extraction, hits <b>Firecrawl cloud</b> directly. Every section carries a tag for where it runs, and each live result repeats it with status · latency · bytes · a unique <code>id</code>.</p>
+  <div style="margin-top:7px;display:flex;gap:7px;flex-wrap:wrap;align-items:center"><span class="chip local">🟢 LOCAL</span><span class="mut" style="font-size:11.5px">my self-host (<code>localhost:3002</code>)</span><span class="chip remote">☁️ REMOTE</span><span class="mut" style="font-size:11.5px">Firecrawl cloud (<code>api.firecrawl.dev</code>)</span><span class="chip both">🟢☁️ BOTH</span><span class="mut" style="font-size:11.5px"><code>/scrape</code> — local markdown, remote <code>json</code></span><span class="chip browser">🖥️ IN-BROWSER</span><span class="mut" style="font-size:11.5px">runs in this page, no network</span></div>
   <div style="margin-top:8px;display:flex;align-items:center;gap:7px;flex-wrap:wrap"><label for="fcKeyInput" style="font-size:12.5px"><b>Cloud key</b> (for ☁️ endpoints):</label><input type="password" id="fcKeyInput" placeholder="fc-…" autocomplete="off" oninput="localStorage.setItem('fc_key',this.value.trim())" onfocus="if(!this.value)this.value=localStorage.getItem('fc_key')||''" style="font-family:var(--mono);font-size:12px;padding:4px 8px;border:1px solid #c7d2fe;border-radius:5px;width:160px"><span class="mut" style="font-size:11px">stored only in this browser’s localStorage — never committed</span></div></div>
 </section>
 <div id="endpoints"></div>
@@ -314,7 +320,7 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
   <p class="mut">Two things I built on the v2 surface to learn it by shipping — both real branches on my fork, runnable inline here with canned data (no key).</p>
 
   <div class="card">
-    <div class="lbl">scrape-quality · an LLM-readiness score for a scrape — <code>grade(doc)</code></div>
+    <div class="lbl">scrape-quality · an LLM-readiness score for a scrape — <code>grade(doc)</code><span class="chip browser" title="grade() is a pure function — runs in this page, no network">🖥️ IN-BROWSER</span></div>
     <div class="mono" style="font-size:12.5px;color:#c2410c;margin:4px 0">examples/scrape-quality/src/index.ts · grade(doc) → { score, rating, summary, dimensions, findings }</div>
     <p class="mut" style="margin:.3em 0 8px;font-size:13px">A pure scorer for how usable a scrape is to an LLM. Premise: today's success gate ("markdown isn't empty") is too weak — and <b>a single high-severity finding caps the grade</b>. The real <code>grade()</code> composes <b>six</b> scorers (in <code>src/scoring/*</code>) and an optional metric-anchored LLM judge (<code>src/judge.ts</code>):</p>
     <ul class="mut" style="font-size:12.5px;margin:4px 0 6px;padding-left:18px;columns:2;-webkit-columns:2">
@@ -354,7 +360,7 @@ Starter $19/mo</textarea>
 await client.createMonitor({ urls, goal, judgeEnabled: true }); // once
 await client.runCheck(monitorId);                               // on-demand check
 const pages = await client.checkPages(monitorId, checkId);      // per-URL, server-judged</pre></div>
-    <div class="lbl" style="margin-top:12px">The live monitor — <b style="color:#3730a3">real ☁️ <code>/v2/monitor</code></b> (needs your cloud key)</div>
+    <div class="lbl" style="margin-top:12px">The live monitor<span class="chip remote">☁️ REMOTE</span> — <code>/v2/monitor</code> (needs your cloud key)</div>
     <div id="mlanes" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:6px"></div>
     <div class="row" style="margin-top:10px"><button class="btn" onclick="monCheck()">Check now ▶</button><span class="mut" id="monMeta" style="font-size:12px"></span></div>
     <p class="note">Press <b>Check now</b> — it creates a monitor (reused across checks), triggers an on-demand <code>/run</code>, and reads the per-URL result the server scraped + judged. First check sets baselines (all 🆕); press again after a bit to catch real changes (price → 🔴, HN votes → 🟡 churn, Wikipedia → ⚪). Takes ~15–30s; the baseline lives server-side. This is the exact flow my change-feed example uses.</p>
@@ -601,13 +607,18 @@ const CODEREF={
  agent:['controllers/v2/agent.ts:15 · agentController()','ASYNC — the v3 autonomy endpoint; models <code>spark-1-pro</code> / <code>spark-1-mini</code>.'],
  monitor:['controllers/v2/monitor.ts:186 · createMonitorController()','Schedules recurring changeTracking (also <code>listMonitorsController</code>:239, <code>getMonitorController</code>:256). <code>judge_enabled</code> adds the LLM diff-judge.']
 };
+function epChip(id){
+  if(id==="scrape")return '<span class="chip both" title="markdown runs on my self-host; json/LLM extraction routes to Firecrawl cloud">🟢☁️ LOCAL + REMOTE</span>';
+  if(id==="map")return '<span class="chip local" title="runs on my local self-host at localhost:3002">🟢 LOCAL</span>';
+  return '<span class="chip remote" title="runs on Firecrawl cloud at api.firecrawl.dev">☁️ REMOTE</span>';
+}
 function epBlock(e){
   const exNames=Object.keys(e.examples);
   const fieldsRows=e.fields.map(f=>`<tr><td><code>${f[0]}</code></td><td class="mut">${f[1]}</td><td>${f[2]}</td></tr>`).join("");
   const tag = e.sync?'<span class="pill" style="background:var(--grnbg);color:#15803d;border-color:#bbf7d0">🟢 sync · inline</span>':'<span class="pill" style="background:var(--blubg);color:#1d4ed8;border-color:#bfdbfe">🔵 async · id + poll</span>';
   const pollBtn = e.poll?`<button class="btn g" onclick="pollEp('${e.id}')">Poll /:id ↻</button>`:'';
   return `<section id="${e.id}">
-    <h2>${e.title}</h2>
+    <h2>${e.title}${epChip(e.id)}</h2>
     <div>${tag}</div>
     <div class="ep"><span class="v">${e.m}</span> https://api.firecrawl.dev${e.path}</div>
     <div class="card" style="margin:10px 0;padding:11px 14px"><div class="lbl">📁 in the code</div><div class="mono" style="font-size:12.5px;color:#c2410c;margin-top:2px">apps/api/src/${CODEREF[e.id][0]}</div><p class="mut" style="margin:.35em 0 0;font-size:13px">${CODEREF[e.id][1]}</p></div>
@@ -639,7 +650,7 @@ function needsCloud(id,body){ if(CLOUD_EP.has(id))return true; var f=body&&body.
 function netBadge(kind,method,path,status,ms,bytes,idv){
   var cloud=kind==="cloud";
   var host=cloud?"https://api.firecrawl.dev":"http://localhost:3002";
-  var label=cloud?"☁️ <b>REAL — FIRECRAWL CLOUD</b>":"🟢 <b>REAL — LOCAL SELF-HOST</b>";
+  var label=cloud?"☁️ <b>REMOTE</b> · Firecrawl cloud":"🟢 <b>LOCAL</b> · self-host";
   var css=cloud?"color:#3730a3;background:#eef2ff;border:1px solid #c7d2fe":"color:#166534;background:#f0fdf4;border:1px solid #bbf7d0";
   return '<div style="font-size:11px;margin-bottom:6px;font-family:var(--mono);border-radius:6px;padding:5px 9px;line-height:1.5;'+css+'">'+label+' &nbsp; '+method+' '+host+path+' &nbsp;·&nbsp; HTTP '+status+' &nbsp;·&nbsp; '+ms+'&nbsp;ms &nbsp;·&nbsp; '+bytes+'&nbsp;bytes'+(idv?' &nbsp;·&nbsp; id '+String(idv).slice(0,24):'')+'</div>';
 }
@@ -763,7 +774,7 @@ async function monCheck(){
       return monLaneCard(u,d[0],d[1],summary||diff,p.status==="changed"?("judge → significant: "+(sig?"true":"false")):"");
     }).join(""));
     var ms=Math.round(performance.now()-t0);
-    meta.innerHTML='<span style="color:#3730a3">☁️ <b>REAL /v2/monitor</b> · check '+String(check.id).slice(0,8)+'… · '+pages.length+' URLs judged server-side · '+ms+' ms</span>';
+    meta.innerHTML='<span style="color:#3730a3">☁️ <b>REMOTE · /v2/monitor</b> · check '+String(check.id).slice(0,8)+'… · '+pages.length+' URLs judged server-side · '+ms+' ms</span>';
   }catch(e){ meta.textContent="monitor error: "+((e&&e.message)||e); }
 }
 monInit();
