@@ -12,6 +12,7 @@ import {
 } from "./llmExtract";
 import { performQuery } from "./query";
 import { uploadScreenshot } from "./uploadScreenshot";
+import { deriveQuality } from "./quality";
 import { removeBase64Images } from "./removeBase64Images";
 import { performAgent } from "./agent";
 import { performAttributes } from "./performAttributes";
@@ -557,6 +558,9 @@ const transformerStack: Transformer[] = [
   deriveImagesFromHTML,
   deriveBrandingFromActions,
   deriveMetadataFromRawHTML,
+  // quality runs on the finalized markdown (post clean-content) but BEFORE the LLM transformers
+  // below, which can replace document.markdown — so we grade the scraped page, not extracted JSON.
+  deriveQuality,
   uploadScreenshot,
   ...(useIndex ? [sendDocumentToIndex] : []),
   ...(useSearchIndex ? [sendDocumentToSearchIndex] : []), // Add to search index for real-time search

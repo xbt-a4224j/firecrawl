@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { config } from "../../config";
 import { z } from "zod";
+import type { QualityReport } from "../../lib/quality";
 import { protocolIncluded, checkUrl } from "../../lib/validateUrl";
 import { countries } from "../../lib/validate-country";
 import { includesFormat } from "../../lib/format-utils";
@@ -625,6 +626,7 @@ const baseScrapeOptions = z.strictObject({
   __experimental_omce: z.boolean().prefault(false).optional(),
   __experimental_omceDomain: z.string().optional(),
   __experimental_engpicker: z.boolean().prefault(false).optional(),
+  __experimental_quality: z.boolean().prefault(false).optional(),
   __forceFirePDF: z.boolean().prefault(false).optional(),
 });
 
@@ -1122,6 +1124,8 @@ export type Document = {
   answer?: string;
   highlights?: string;
   branding?: BrandingProfile;
+  /** Scrape-quality signal — present only when __experimental_quality is set. */
+  quality?: QualityReport;
   warning?: string;
   attributes?: {
     selector: string;
