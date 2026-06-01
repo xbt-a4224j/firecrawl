@@ -24,7 +24,8 @@ export interface FeedItem {
   status: "new" | "changed" | "same" | "removed" | "error";
   significant: boolean; // is this a meaningful content change (not vote/timestamp/reorder churn)?
   summary: string | null; // one-line, plain-English "what changed"
-  previousScrapeAt: string | null;
+  previousScrapeAt: string | null; // server baseline timestamp (changeTracking path)
+  previousScrapeId?: string | null; // server baseline scrape id (/monitor path — id, not timestamp)
   diff: string | null;
   error?: string;
 }

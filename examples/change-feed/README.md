@@ -4,7 +4,10 @@ Turn **any webpage into a change-feed** — even the ~90% of the web with no RSS
 page, a Terms of Service, a competitor's changelog, a docs page, a job board. When something changes,
 an LLM tells you **what meaningfully changed and why it matters** — not a raw text diff.
 
-Built on Firecrawl's **`changeTracking`** — a powerful hosted feature with (until now) zero examples.
+Runs on Firecrawl's **`/v2/monitor`** endpoint — the productized change-monitoring API (scheduling,
+diff storage, and the "did this meaningfully change?" judge, all server-side). The original
+`changeTracking` primitive it's built on is still here too, behind `--primitive`, powering the live
+sync dashboard.
 
 ## See it live
 
@@ -15,20 +18,28 @@ Three real public pages, monitored on an interval: a **price page → 🔴** (ca
 **Wikipedia article → ⚪** (stable). Each lane shows the server baseline timestamp it diffed against and
 the credits the ping cost.
 
-## Why this is more than "scrape twice and diff"
+## Two layers: the primitive and the product
 
-Firecrawl stores the previous scrape of each page for you, server-side, and diffs against it
-automatically. You hold **no state** — each check compares against the last one and becomes the new
-baseline. (Index of last-scrape-per-`(team, url, tag)` lives in Postgres; the content in GCS.) It can
-even LLM-summarize the delta for you. So this example is the **feed UX + scheduling** on top of a
-primitive that's already doing the hard part.
+Firecrawl exposes change-detection at two levels, and this example uses the right one for each job:
+
+- **`changeTracking`** (the primitive) — a *synchronous* scrape format: "diff this page against its
+  stored baseline, right now, inline." One call, instant result. Perfect for an **interactive
+  dashboard** you watch live. This is the v1 path (`watch.ts`, `--primitive`).
+- **`/v2/monitor`** (the product, shipped 2026-05) — *productizes* exactly that pattern: it schedules
+  checks, stores the diff artifacts, runs the judge **server-side**, and keeps a check history. The
+  right tool for **ongoing monitoring** — which is what a change-feed is. This is the default path
+  (`monitor.ts`).
+
+So the CLI became a **thin client over `/monitor`** — create a monitor, trigger an on-demand check
+(`/run`), read the per-URL results — and we deleted the hand-rolled poll loop, concurrency pool, and
+baseline bookkeeping. The judge that decides 🔴-vs-🟡 now lives on the server, not in our code.
 
 ```
-your watchlist ──► firecrawl.scrape(url, { formats: ["markdown",
-                      { type: "changeTracking", modes: ["git-diff","json"], prompt }] })
-                              │  Firecrawl diffs vs the stored baseline, LLM-summarizes the change
+your watchlist ──► POST /v2/monitor                 (create once; judge enabled)
+                ──► POST /v2/monitor/:id/run         (on-demand check)
+                ──► GET  /v2/monitor/:id/checks/:cid  (per-URL pages, server-judged)
                               ▼
-   feed item: { status: new|changed|same|removed, summary: "Price rose $20 → $29", diff }
+   feed item: { status: new|changed|same|removed, summary: "Price rose $20 → $29", significant, diff }
 ```
 
 ## Run it
@@ -38,12 +49,13 @@ pnpm install
 export FIRECRAWL_API_KEY=fc-...          # a CLOUD key — changeTracking is hosted
 
 pnpm watch https://openai.com/pricing https://news.ycombinator.com
-#   first run → everything is NEW (baselines are set)
-pnpm watch https://openai.com/pricing https://news.ycombinator.com --diff
-#   run again later → CHANGED items, each with an LLM "what changed & why", and the diff
+#   creates a monitor + runs a check → everything is NEW (baselines set). Prints the monitor id.
+pnpm watch --monitor=<id> --diff
+#   reuse that monitor later → CHANGED items, each server-judged, with the diff
 
-pnpm watch --file=watchlist.txt          # one URL per line
-pnpm watch <urls> --only-significant      # mute the 🟡 trivial churn, show only real changes
+pnpm watch --file=watchlist.txt           # one URL per line
+pnpm watch <urls> --only-significant       # mute the 🟡 trivial churn, show only real changes
+pnpm watch <urls> --primitive              # v1 path: drive changeTracking directly (sync, stateless)
 ```
 
 Every run prints what it cost — `… · 5 credits used · 955 remaining` — so it never quietly burns your
@@ -88,19 +100,28 @@ Schedule the CLI (cron / GitHub Action) to get a recurring "what changed across 
 
 ## How it works (the code)
 
-- `src/watch.ts` — `watchUrls(urls, { scrape })`: maps each URL's `changeTracking` result into a feed
-  item (`new`/`changed`/`same`/`removed`), with the LLM summary + diff. Per-URL isolation; pure +
-  unit-tested (the scrape fn is injected). The significance policy is one externalized, tunable prompt.
+- `src/monitor.ts` — **the default path.** A thin client over `/v2/monitor`: `createFeedMonitor` →
+  `runMonitorCheck` (trigger + poll) → `pageToFeedItem`. The `MonitorClient` is injected, so the
+  mapping/poll logic is unit-tested offline; the real one is a small fetch wrapper. The server judge's
+  verdict is normalized defensively into `{ summary, significant }`.
+- `src/watch.ts` — **the v1 primitive path** (`--primitive`, and the live dashboard): `watchUrls(urls,
+  { scrape })` maps each URL's synchronous `changeTracking` result into a feed item. Per-URL isolation;
+  pure + injected scrape fn. The significance policy is one externalized, tunable prompt (reused as the
+  monitor's server-side `goal`).
 - `src/format.ts` / `src/stats.ts` / `src/errors.ts` — terminal rendering, run stats, teaching errors.
-- `src/cli.ts` — wires the real Firecrawl cloud client and prints the feed.
-- `src/web/App.tsx` + `vite.config.ts` — the swimlane dashboard and the key-safe `/api/check` route.
+- `src/cli.ts` — picks the engine (`/monitor` by default, `--primitive` for changeTracking) and prints
+  the feed.
+- `src/web/App.tsx` + `vite.config.ts` — the swimlane dashboard (on the sync primitive) and the
+  key-safe `/api/check` route.
 
 ```bash
-pnpm test        # 20 tests, no network (injected client)
+pnpm test        # 33 tests, no network (injected clients) — 13 cover the /monitor path
 ```
 
 ## Notes
 
-- **Cloud only.** `changeTracking` needs Firecrawl's hosted baseline store; it won't run on a bare
-  self-host. Point at `api.firecrawl.dev`.
+- **Cloud only.** Both `/monitor` and `changeTracking` are hosted (baseline store + server-side
+  judge); neither runs on a bare self-host. Point at `api.firecrawl.dev`.
+- The `/monitor` path needs a `goal`/`judgeEnabled` for the server judge; we pass the same
+  signal-vs-noise policy the primitive used as a prompt. First check on a fresh monitor is all `NEW`.
 - Use a `tag` (per-URL) if you want multiple independent watch-streams on the same page.

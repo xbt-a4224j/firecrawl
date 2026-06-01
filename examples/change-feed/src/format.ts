@@ -32,6 +32,8 @@ export function formatFeed(items: FeedItem[], opts: { showDiff?: boolean } = {})
     const baseline = fmtTime(item.previousScrapeAt);
     if (baseline && item.status !== "new") {
       lines.push(`    ↳ diffed against baseline from ${baseline}`);
+    } else if (item.previousScrapeId && item.status !== "new") {
+      lines.push(`    ↳ diffed against baseline scrape ${item.previousScrapeId}`);
     }
     if (opts.showDiff && item.diff) {
       lines.push(...item.diff.split("\n").slice(0, 8).map((l) => `    ${l}`));
