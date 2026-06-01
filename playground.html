@@ -546,7 +546,7 @@ const EP=[
 
  {id:"batch",m:"POST",path:"/v2/batch/scrape",sync:false,title:"/batch/scrape — many known URLs (async)",
   blurb:"Same async spine as crawl, but you supply the URL list yourself (no discovery). Returns an <code>id</code>, poll for results. The status endpoint pages results with a cursor + a 10 MiB cap so one poll is never unbounded.",
-  examples:{"basic":{urls:["https://firecrawl.dev","https://docs.firecrawl.dev","https://news.ycombinator.com"],formats:["markdown"]}},
+  examples:{"basic":{urls:["https://docs.firecrawl.dev/features/scrape","https://docs.firecrawl.dev/features/crawl","https://docs.firecrawl.dev/features/map"],formats:["markdown"]}},
   poll:true,
   fields:[["urls","string[]","the URLs to scrape (required)"],["formats","string[]","what to return for each"],["ignoreInvalidURLs","boolean","skip bad URLs instead of erroring"]]},
 
