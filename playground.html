@@ -447,24 +447,7 @@ function bugGlue(fixed){
     '<pre>'+esc+'</pre><div class="mut" style="font-size:12px;margin-top:6px">'+caption+'</div>';
 }
 
-/* ---------- Schema Lab: generate a sample from a JSON schema ---------- */
-const SAMPLE_STR=["Firecrawl","the eyes for AGI","San Francisco, CA","2026-05-31","clean markdown"];
-let stri=0;
-function sampleFromSchema(s){
-  if(!s||typeof s!=="object") return null;
-  if(s.enum&&Array.isArray(s.enum)) return s.enum[0];
-  switch(s.type){
-    case "string": return SAMPLE_STR[(stri++)%SAMPLE_STR.length];
-    case "number": case "integer": return Math.round((19+Math.random()*280));
-    case "boolean": return true;
-    case "array": return [sampleFromSchema(s.items||{type:"string"}), sampleFromSchema(s.items||{type:"string"})];
-    case "object": default: {
-      const o={}; const props=s.properties||{};
-      for(const k of Object.keys(props)) o[k]=sampleFromSchema(props[k]);
-      return o;
-    }
-  }
-}
+
 function treeOf(s,ind){
   ind=ind||"";let out="";
   if(s.type==="object"||s.properties){
