@@ -13,7 +13,7 @@
 
 | Artifact | What it is | Branch | One-liner |
 |---|---|---|---|
-| **change-feed** | "RSS for anything" — live change monitor on `changeTracking` | [`example-change-feed`](https://github.com/xbt-a4224j/firecrawl/tree/example-change-feed/examples/change-feed) | `pnpm dev` |
+| **change-feed** | "RSS for anything" — change monitor on `/v2/monitor` (changeTracking primitive underneath) | [`example-change-feed`](https://github.com/xbt-a4224j/firecrawl/tree/example-change-feed/examples/change-feed) | `pnpm dev` |
 | **scrape-quality** | LLM-readiness score for a scrape (`grade(doc)`) | [`scrape-quality`](https://github.com/xbt-a4224j/firecrawl/tree/scrape-quality/examples/scrape-quality) | `pnpm grade <url>` |
 | **Zod v4 fix** (issue 3300) | v4 schema silently dropped → empty extraction | [`fix/3300-zod-scrape-schema`](https://github.com/xbt-a4224j/firecrawl/tree/fix/3300-zod-scrape-schema) | `npx jest scrape-json-schema` |
 | **glue fix** (issue 3583) | adjacent `<button>`/`<label>` glued in HTML→md | [`fix/3583-inline-glue`](https://github.com/xbt-a4224j/firecrawl/tree/fix/3583-inline-glue) | `npx jest html-to-markdown -t "issue 3583"` |
@@ -43,9 +43,12 @@ https://github.com/user-attachments/assets/6e121ac5-a5b8-4ed1-ada7-8723c3fde015
 
 ## 1. change-feed — "RSS for anything"
 
-A live change-monitor on Firecrawl's hosted `changeTracking`. Every ping diffs each page against
-Firecrawl's **server-side baseline store** and tells you what *meaningfully* changed — **🔴** real
-change, **🟡** churn (vote counts, timestamps), **⚪** stable — not a raw diff.
+A change-monitor that runs on Firecrawl's **`/v2/monitor`** endpoint — the productized change API
+(server-side scheduling, diff storage, and the significance judge). It tells you what *meaningfully*
+changed — **🔴** real change, **🟡** churn (vote counts, timestamps), **⚪** stable — not a raw diff.
+The CLI is a **thin client over `/monitor`**; the underlying `changeTracking` primitive stays behind
+`--primitive` and powers the sync live dashboard. (Two layers, right tool for each — see the example's
+README.)
 
 ![change-feed live monitor: a price page goes red, Hacker News stays amber-muted, Wikipedia stays green](assets/change-feed-live-monitor.gif)
 
@@ -62,10 +65,13 @@ pnpm dev                             # swimlane dashboard → http://localhost:5
 pnpm test                            # 20 tests, no network (injected scrape fn)
 ```
 
-**Senior signals:** signal-vs-noise is an *externalized, tunable prompt*; the core `watchUrls()` is pure
-+ dependency-injected (20 offline tests); results carry the real server baseline timestamp so they're
-verifiable, not spoofable; the key stays server-side behind `/api/check`; bounded-concurrency pool with
-per-URL isolation.
+**Senior signals:** knows the difference between the **primitive** (`changeTracking`, sync) and the
+**product** (`/monitor`, scheduled + server-judged) and uses the right one per job; the CLI is a thin
+client over `/monitor` so the scheduling, diff storage, and judge live server-side; both cores are
+dependency-injected (**33 offline tests**, 13 covering the `/monitor` path); signal-vs-noise is an
+*externalized, tunable prompt* (reused as the monitor's server `goal`); results carry the real server
+baseline (timestamp or scrape id) so they're verifiable, not spoofable; the key stays server-side behind
+`/api/check`.
 
 ---
 
