@@ -321,8 +321,8 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
   <p class="mut">Two things I built on the v2 surface to learn it by shipping — both real branches on my fork, runnable inline here with canned data (no key).</p>
 
   <div class="card">
-    <div class="lbl">scrape-quality · an LLM-readiness score for a scrape — <code>grade(doc)</code><span class="chip browser" title="grade() is a pure function — runs in this page, no network">🖥️ IN-BROWSER</span></div>
-    <div class="mono" style="font-size:12.5px;color:#c2410c;margin:4px 0">examples/scrape-quality/src/index.ts · grade(doc) → { score, rating, summary, dimensions, findings }</div>
+    <h3 style="margin:0 0 4px">scrape-quality<span class="chip browser" title="grade() is a pure function — runs in this page, no network">🖥️ IN-BROWSER</span></h3>
+    <div class="mono" style="font-size:12.5px;color:#c2410c;margin:0 0 8px">examples/scrape-quality/src/index.ts &nbsp;·&nbsp; <code>grade(doc)</code> → { score, rating, findings }</div>
     <p class="mut" style="margin:.3em 0 8px;font-size:13px">A pure scorer for how usable a scrape is to an LLM. Premise: today's success gate ("markdown isn't empty") is too weak — and <b>a single high-severity finding caps the grade</b>. The real <code>grade()</code> composes <b>six</b> scorers (in <code>src/scoring/*</code>) and an optional metric-anchored LLM judge (<code>src/judge.ts</code>):</p>
     <ul class="mut" style="font-size:12.5px;margin:4px 0 6px;padding-left:18px;columns:2;-webkit-columns:2">
       <li><b>structureFidelity</b> — headings/lists survive HTML→md</li>
@@ -354,8 +354,8 @@ Starter $19/mo</textarea>
   </div>
 
   <div class="card">
-    <div class="lbl">change-feed · "RSS for anything" — a change-monitor on <code>/v2/monitor</code></div>
-    <div class="mono" style="font-size:12.5px;color:#c2410c;margin:4px 0">examples/change-feed/src/monitor.ts · createFeedMonitor → runMonitorCheck (CLI default) · primitive in watch.ts behind <code>--primitive</code> · dashboard in web/App.tsx</div>
+    <h3 style="margin:0 0 4px">change-feed — "RSS for anything"<span class="chip remote">☁️ REMOTE</span></h3>
+    <div class="mono" style="font-size:12.5px;color:#c2410c;margin:0 0 8px">examples/change-feed/src/monitor.ts &nbsp;·&nbsp; thin client over <code>/v2/monitor</code> (create → run → read per-URL pages)</div>
     <p class="mut" style="margin:.3em 0 8px;font-size:13px">Two layers, right tool per job: the CLI is a <b>thin client over <code>/v2/monitor</code></b> (the productized endpoint — scheduling, diff storage, and the significance <b>judge run server-side</b>); the synchronous <code>changeTracking</code> primitive underneath still powers the instant live dashboard. Either way the labels are 🔴 real change · 🟡 churn · ⚪ stable.</p>
     <div style="background:#0d1117;color:#e6edf3;border-radius:10px;font-family:var(--mono);font-size:12px;padding:12px 14px"><pre style="margin:0">// monitor.ts — the productized flow (judge server-side)
 await client.createMonitor({ urls, goal, judgeEnabled: true }); // once
@@ -724,29 +724,33 @@ function monDot(p){
   if(p.status==="changed"){ var sig=p.judgment&&(p.judgment.significant||p.judgment.isSignificant); return sig?["🔴","changed"]:["🟡","churn"]; }
   return ["⚪","stable"];
 }
+function monMsg(html){ document.getElementById("mlanes").innerHTML='<div style="grid-column:1/-1;padding:10px;font-size:13px;color:var(--mut)">'+html+'</div>'; }
 async function monCheck(){
   var meta=document.getElementById("monMeta");
-  if(!fcKey()){ meta.textContent="set your Firecrawl cloud key in the banner ↑ — this hits real /v2/monitor"; return; }
+  if(!fcKey()){ monMsg("🔑 paste your Firecrawl cloud key in the banner field ↑ — this hits real <code>/v2/monitor</code>"); meta.textContent=""; return; }
+  monMsg("⏳ contacting Firecrawl cloud…");
   try{
     var id=localStorage.getItem("cf_mon_id");
     if(!id){
-      meta.textContent="⏳ POST api.firecrawl.dev/v2/monitor (creating the monitor) …";
+      monMsg("⏳ creating the monitor on Firecrawl cloud…");
       var cr=await fetch(CLOUD_BASE+"/v2/monitor",{method:"POST",headers:cloudHeaders(),body:JSON.stringify({name:"playground change-feed",schedule:{cron:"0 0 * * *",timezone:"UTC"},notification:{email:{enabled:false}},targets:[{type:"scrape",urls:MON_URLS}],judgeEnabled:true})});
       var cj=await cr.json(); id=(cj.monitor&&cj.monitor.id)||(cj.data&&cj.data.id)||cj.id;
-      if(!id){ meta.textContent="couldn’t create monitor (HTTP "+cr.status+") — is the key valid?"; return; }
+      if(!id){ monMsg("⚠️ couldn’t create monitor (HTTP "+cr.status+") — is the key valid?"); return; }
       localStorage.setItem("cf_mon_id",id);
     }
-    meta.textContent="⏳ POST /v2/monitor/"+String(id).slice(0,8)+"…/run (server scrapes + judges each URL) …";
+    monMsg("⏳ triggering on-demand check… server will scrape + judge all 3 URLs (~15–30s)");
     await fetch(CLOUD_BASE+"/v2/monitor/"+id+"/run",{method:"POST",headers:cloudHeaders()});
-    var t0=performance.now(), check=null;
+    var t0=performance.now(), check=null, polls=0;
     for(var i=0;i<45;i++){
       var lr=await fetch(CLOUD_BASE+"/v2/monitor/"+id+"/checks?limit=1",{headers:cloudHeaders()});
       var lj=await lr.json(); var c=((lj.checks||lj.data)||[])[0];
+      polls++;
       if(c&&(c.status==="completed"||c.status==="partial")){ check=c; break; }
-      if(c&&c.status==="failed"){ meta.textContent="check failed server-side"; return; }
+      if(c&&c.status==="failed"){ monMsg("⚠️ check failed server-side — try again"); return; }
+      monMsg("⏳ waiting for check to complete… (poll "+polls+", status: "+(c&&c.status||"queued")+")");
       await new Promise(function(r){setTimeout(r,2000);});
     }
-    if(!check){ meta.textContent="check didn’t finish in time — try Check now again"; return; }
+    if(!check){ monMsg("⚠️ check didn’t finish in time — try Check now again"); return; }
     var pr=await fetch(CLOUD_BASE+"/v2/monitor/"+id+"/checks/"+check.id+"?limit=100",{headers:cloudHeaders()});
     var pj=await pr.json(); var pages=(pj.data&&pj.data.pages)||pj.pages||[];
     var find=function(u){ var bare=u.replace(/^https?:\/\//,""); return pages.find(function(p){return p.url&&(p.url===u||p.url.replace(/^https?:\/\//,"").replace(/\/$/,"")===bare.replace(/\/$/,""));}); };
@@ -759,7 +763,7 @@ async function monCheck(){
     }).join(""));
     var ms=Math.round(performance.now()-t0);
     meta.innerHTML='<span style="color:#3730a3">☁️ <b>REMOTE · /v2/monitor</b> · check '+String(check.id).slice(0,8)+'… · '+pages.length+' URLs judged server-side · '+ms+' ms</span>';
-  }catch(e){ meta.textContent="monitor error: "+((e&&e.message)||e); }
+  }catch(e){ monMsg("⚠️ error: "+((e&&e.message)||String(e))); }
 }
 monInit();
 
