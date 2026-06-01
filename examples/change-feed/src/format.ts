@@ -1,5 +1,5 @@
 /** Render a feed of change-items as a readable terminal report. */
-import type { FeedItem } from "./watch";
+import type { FeedItem } from "./monitor";
 import { errorHint } from "./errors";
 
 /** ISO timestamp → compact, human "2026-05-30 14:32:07 UTC" (drops millis/T/Z noise). */

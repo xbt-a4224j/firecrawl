@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { FeedItem } from "../watch";
+import type { FeedItem } from "../monitor";
 
 /** The three real public pages from the signal-vs-noise demo: one reliably red, one noisy, one stable. */
 const DEFAULT_URLS = [
@@ -66,6 +66,11 @@ export function App() {
   const urlsRef = useRef(urls);
   urlsRef.current = urls;
 
+  // the server creates one monitor and returns its id; reuse it across ticks so each check diffs
+  // against the same baseline. Editing the watchlist starts a fresh monitor.
+  const monitorIdRef = useRef<string | null>(null);
+  useEffect(() => { monitorIdRef.current = null; }, [urls]);
+
   async function poll() {
     const targets = urlsRef.current;
     if (targets.length === 0) return;
@@ -75,10 +80,11 @@ export function App() {
       const res = await fetch("/api/check", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ urls: targets }),
+        body: JSON.stringify({ urls: targets, monitorId: monitorIdRef.current }),
       });
       const data = await res.json();
       if (data.error) { setError(data.error); return; }
+      if (data.monitorId) monitorIdRef.current = data.monitorId;
       const now = Date.now();
       setLanes((prev) => {
         const next = { ...prev };
@@ -89,7 +95,7 @@ export function App() {
             status: it.status,
             significant: it.significant,
             summary: it.summary,
-            baselineAt: it.previousScrapeAt,
+            baselineAt: it.previousScrapeId ?? it.previousScrapeAt,
             diff: it.diff,
           };
           next[it.url] = {

@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { formatFeed, fmtTime } from "./format";
-import type { FeedItem } from "./watch";
+import type { FeedItem } from "./monitor";
 
 const base = { previousScrapeAt: null, diff: null as string | null };
 const items: FeedItem[] = [

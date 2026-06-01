@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { summarizeRun, formatRunLine } from "./stats";
-import type { FeedItem } from "./watch";
+import type { FeedItem } from "./monitor";
 
 const b = { previousScrapeAt: null, diff: null as string | null };
 const items: FeedItem[] = [

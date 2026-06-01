@@ -1,5 +1,5 @@
 /** Run accounting — what a check covered and (optionally) what it cost. */
-import type { FeedItem } from "./watch";
+import type { FeedItem } from "./monitor";
 
 export interface RunStats {
   watched: number;

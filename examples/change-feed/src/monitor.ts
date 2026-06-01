@@ -1,28 +1,44 @@
 /**
- * change-feed on /v2/monitor — the productized change endpoint.
+ * change-feed core — on Firecrawl's /v2/monitor, the productized change endpoint.
  *
- * v1 of this example drove `changeTracking` by hand (see watch.ts): a client poll loop, a
- * concurrency pool, and per-URL baseline management. `/monitor` (shipped 2026-05) is the
- * *productized* version of exactly that — it schedules checks, stores the diff artifacts, and runs
- * the "did this meaningfully change?" judge SERVER-SIDE. So change-feed becomes a thin client:
- * create a monitor once, trigger an on-demand check (`/run`), read the per-URL results — and we
- * delete the hand-rolled loop, pool, and baseline bookkeeping.
+ * /monitor schedules checks, stores the diff artifacts, and runs the "did this meaningfully change?"
+ * judge SERVER-SIDE. So this example is a thin client: create a monitor once, trigger an on-demand
+ * check (/run), read the per-URL results. No client-side poll pool, no baseline bookkeeping, no
+ * per-URL scrape loop — the server owns all of it. (It's built on the synchronous `changeTracking`
+ * scrape format; /monitor is that primitive productized with scheduling + a server judge.)
  *
- * The HTTP client is injected (MonitorClient) so the mapping logic stays testable offline; the real
- * one (`httpMonitorClient`) is a small fetch wrapper over the cloud API. Response field access is
- * defensive (`a ?? b ?? c`) because the endpoint is new and still settling.
+ * The HTTP client is injected (MonitorClient) so the mapping/poll logic is unit-tested offline; the
+ * real one (`httpMonitorClient`) is a small fetch wrapper. Field access is defensive (`a ?? b`)
+ * because the endpoint is new and not yet in the JS SDK — once it is, the transport here disappears.
  *
  * Maps to apps/api/src/controllers/v2/monitor.ts:
  *   POST   /v2/monitor                       create        → { monitor: { id } }
  *   POST   /v2/monitor/:id/run               on-demand check (1 credit)
- *   GET    /v2/monitor/:id/checks?limit=1    latest check  → { checks: [{ id, status, summary }] }
- *   GET    /v2/monitor/:id/checks/:checkId   per-URL pages → { data: { pages: [...], next } }
+ *   GET    /v2/monitor/:id/checks?limit=1    latest check  → { checks: [{ id, status }] }
+ *   GET    /v2/monitor/:id/checks/:checkId   per-URL pages → { data: { pages: [...] } }
  */
-import type { FeedItem } from "./watch";
-import { DEFAULT_PROMPT } from "./watch";
 
-/** The server-side judge goal — same signal-vs-noise policy the v1 prompt encoded. */
-export const DEFAULT_GOAL = DEFAULT_PROMPT;
+export interface FeedItem {
+  url: string;
+  status: "new" | "changed" | "same" | "removed" | "error";
+  significant: boolean; // a meaningful content change (not vote/timestamp/reorder churn)?
+  summary: string | null; // one-line, plain-English "what changed"
+  previousScrapeAt: string | null; // baseline timestamp (null on the /monitor path)
+  previousScrapeId?: string | null; // server baseline anchor (id) — the /monitor verifiable anchor
+  diff: string | null;
+  error?: string;
+}
+
+/** The server-side judge goal — the signal-vs-noise policy (sent as the monitor's `goal`). */
+export const DEFAULT_GOAL =
+  "Decide whether a webpage changed in a way a human watcher would care about. " +
+  "Treat as NOT significant when the only differences are churn — vote/point/comment counts, view " +
+  'or like counters, timestamps or relative times ("1 hour ago"), reordering, rotating ads, or ' +
+  "session/tracking tokens. Treat as significant when the substantive meaning changed. In " +
+  "particular, ANY change to a price, currency amount, plan/tier cost, or stock/crypto quote is " +
+  "ALWAYS significant, no matter how small — report the old and new value. Likewise an " +
+  "added/removed/reworded headline, product, or list item, a policy/terms wording change, or an " +
+  "availability/stock/status change.";
 
 // --- the slice of the /v2/monitor response surface we depend on ---
 export type PageStatus = "same" | "new" | "changed" | "removed" | "error";
@@ -86,7 +102,7 @@ export function normalizeJudgment(judgment: unknown): {
   return { summary, significant };
 }
 
-/** A /monitor check page → the same FeedItem the changeTracking path produced. */
+/** A /monitor check page → a feed item. */
 export function pageToFeedItem(p: MonitorPage): FeedItem {
   const status = p.status;
   const { summary, significant } = normalizeJudgment(p.judgment);
@@ -192,26 +208,22 @@ export function httpMonitorClient(
       return c ? { id: c.id, status: c.status } : null;
     },
     async checkPages(monitorId, checkId) {
-      const out: MonitorPage[] = [];
-      let url: string | null =
-        `${baseUrl}/v2/monitor/${monitorId}/checks/${checkId}?limit=100`;
-      let guard = 0;
-      while (url && guard++ < 50) {
-        const d = await json(await fetch(url, { headers }));
-        const pages = d.data?.pages ?? d.pages ?? [];
-        for (const p of pages) {
-          out.push({
-            url: p.url,
-            status: p.status,
-            judgment: p.judgment,
-            diff: p.diff,
-            previousScrapeId: p.previousScrapeId,
-            error: p.error,
-          });
-        }
-        url = d.next ?? d.data?.next ?? null;
-      }
-      return out;
+      // Monitors cap at 50 targets, so one page of 100 always covers a check — no pagination needed.
+      const d = await json(
+        await fetch(
+          `${baseUrl}/v2/monitor/${monitorId}/checks/${checkId}?limit=100`,
+          { headers },
+        ),
+      );
+      const pages = d.data?.pages ?? d.pages ?? [];
+      return pages.map((p: any) => ({
+        url: p.url,
+        status: p.status,
+        judgment: p.judgment,
+        diff: p.diff,
+        previousScrapeId: p.previousScrapeId,
+        error: p.error,
+      }));
     },
   };
 }
