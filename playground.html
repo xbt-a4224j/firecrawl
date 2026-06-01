@@ -264,7 +264,7 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
   }
   <span style="color:#94a3b8">// package.json: raise the zod floor to ^3.25 (ships v4 at the subpath — no new dep)</span></pre></div>
     <p class="mut" style="margin:6px 0 4px;font-size:12.5px"><b>the proof</b> · <code>scrape-json-schema.test.ts</code> — mocks the POST to capture the schema sent: [control] v3 → populated; [repro] v4 → <b>FAILS on main</b> (stub has no type/properties) → <b>passes after</b>; [passthrough] plain JSON Schema unchanged. <b>Ran it: 3/3 green.</b></p>
-    <p class="mut" style="margin:0 0 14px;font-size:12.5px">⚠ <a href="https://github.com/firecrawl/firecrawl/pull/3345">#3345</a> re-adds conversion in <code>scrape.ts</code> — redundant (validation already converts) and never touches the v4 converter. <a href="https://github.com/firecrawl/firecrawl/pull/3302">#3302</a> resolves zod from <code>process.cwd()</code> → hits v3 on the 3.25 bridge, misses the <code>zod/v4</code> subpath.</p>
+    <p class="mut" style="margin:0 0 14px;font-size:12.5px">⚠ <a href="https://github.com/firecrawl/firecrawl/pull/3345">#3345</a> re-adds conversion in <code>scrape.ts</code> — redundant (validation already converts) and never touches the v4 converter. <a href="https://github.com/firecrawl/firecrawl/pull/3302">#3302</a> resolves zod from <code>process.cwd()</code> → hits v3 on the 3.25 bridge, misses the <code>zod/v4</code> subpath. → <a href="https://github.com/xbt-a4224j/firecrawl/compare/main...fix/3300-zod-scrape-schema" target="_blank" rel="noopener">the full diff on my fork ↗</a></p>
 
     <h3 style="margin:18px 0 4px">#3583 — adjacent &lt;button&gt;/&lt;label&gt; glued in HTML→md · <a href="https://github.com/firecrawl/firecrawl/issues/3583">issue</a></h3>
     <p class="mut" style="margin:0 0 6px;font-size:12.5px">@vladgthb: <i>"duplicated adjacent words with no separating whitespace (FunktionalFunktional)… Same call with formats:['html'] does NOT exhibit it → the bug is in the markdown serializer."</i></p>
@@ -298,7 +298,7 @@ kbd{font-family:var(--mono);font-size:11px;background:#f4f4f5;border:1px solid v
 <span style="display:block;background:rgba(63,185,80,.14);color:#7ee787">+ 		},</span>
 <span style="display:block;background:rgba(63,185,80,.14);color:#7ee787">+ 	})</span></pre></div>
     <p class="mut" style="margin:6px 0 4px;font-size:12.5px"><b>the proof</b> · <code>html-to-markdown.test.ts</code> — the inline guard is <b>backend-agnostic</b>, so one test guards Go AND Turndown. <b>Ran it: green</b> (loaded the real native Go module).</p>
-    <p class="mut" style="margin:0;font-size:12.5px">⚠ <a href="https://github.com/firecrawl/firecrawl/pull/3586">#3586</a> does a blunt <i>dedup</i> — which would also merge <code>&lt;b&gt;Fire&lt;/b&gt;&lt;b&gt;crawl&lt;/b&gt;</code> = "Firecrawl". Mine <b>separates</b>, not dedups, so genuine inline survives.</p>
+    <p class="mut" style="margin:0;font-size:12.5px">⚠ <a href="https://github.com/firecrawl/firecrawl/pull/3586">#3586</a> does a blunt <i>dedup</i> — which would also merge <code>&lt;b&gt;Fire&lt;/b&gt;&lt;b&gt;crawl&lt;/b&gt;</code> = "Firecrawl". Mine <b>separates</b>, not dedups, so genuine inline survives. → <a href="https://github.com/xbt-a4224j/firecrawl/compare/main...fix/3583-inline-glue" target="_blank" rel="noopener">the full diff on my fork ↗</a></p>
   </div>
 </section>
 
@@ -354,10 +354,10 @@ Starter $19/mo</textarea>
 await client.createMonitor({ urls, goal, judgeEnabled: true }); // once
 await client.runCheck(monitorId);                               // on-demand check
 const pages = await client.checkPages(monitorId, checkId);      // per-URL, server-judged</pre></div>
-    <div class="lbl" style="margin-top:12px">The live monitor — embedded (canned demo)</div>
+    <div class="lbl" style="margin-top:12px">The live monitor — <b style="color:#3730a3">real ☁️ <code>/v2/monitor</code></b> (needs your cloud key)</div>
     <div id="mlanes" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:6px"></div>
     <div class="row" style="margin-top:10px"><button class="btn" onclick="monCheck()">Check now ▶</button><span class="mut" id="monMeta" style="font-size:12px"></span></div>
-    <p class="note">Click Check a few times — each lane cycles its real-world behavior. The "old state" isn't stored here; in the real app it lives server-side, and each ping diffs against it.</p>
+    <p class="note">Press <b>Check now</b> — it creates a monitor (reused across checks), triggers an on-demand <code>/run</code>, and reads the per-URL result the server scraped + judged. First check sets baselines (all 🆕); press again after a bit to catch real changes (price → 🔴, HN votes → 🟡 churn, Wikipedia → ⚪). Takes ~15–30s; the baseline lives server-side. This is the exact flow my change-feed example uses.</p>
   </div>
 </section>
 
@@ -711,31 +711,62 @@ function gradeDoc(){
   var score=f.length===0?96:high?52:f.length>=2?68:81;
   show("qOut",{score:score,rating:rating,summary:f.length===0?"clean, LLM-ready":(high?"a high-severity finding caps the grade":"usable with caveats"),findings:f});
 }
-/* ---------- Examples: change-feed monitor (canned) ---------- */
-var MON=[
-  {url:"coindesk.com/price/btc",states:[
-    {dot:"🔴",label:"changed",diff:"$74,092 → $74,081",judge:"significant: true"},
-    {dot:"⚪",label:"stable",diff:"no change",judge:"—"}]},
-  {url:"news.ycombinator.com",states:[
-    {dot:"🟡",label:"churn",diff:"votes 312 → 318, +2 comments",judge:"significant: false (noise)"},
-    {dot:"🟡",label:"churn",diff:"votes 318 → 404",judge:"significant: false (noise)"}]},
-  {url:"en.wikipedia.org/wiki/Web_scraping",states:[
-    {dot:"⚪",label:"stable",diff:"no change",judge:"—"},
-    {dot:"🔴",label:"changed",diff:"+1 paragraph in §Legal issues",judge:"significant: true"}]}
-];
-var monTick=0;
-function monRender(){
-  document.getElementById("mlanes").innerHTML=MON.map(function(l){
-    var s=l.states[monTick%l.states.length];
-    return '<div class="card" style="padding:11px 12px"><div style="font-size:18px;line-height:1">'+s.dot+'</div>'+
-      '<div class="mono" style="font-size:11px;word-break:break-all;margin:3px 0 6px;color:#71717a">'+l.url+'</div>'+
-      '<div style="font-size:12.5px"><b>'+s.label+'</b></div>'+
-      '<div class="mut" style="font-size:12px;margin-top:3px">'+s.diff+'</div>'+
-      '<div class="mut" style="font-size:11px;margin-top:5px">'+s.judge+'</div></div>';
-  }).join("");
+/* ---------- Examples: change-feed monitor — REAL /v2/monitor (cloud) ---------- */
+var MON_URLS=["https://www.coindesk.com/price/bitcoin","https://news.ycombinator.com","https://en.wikipedia.org/wiki/Web_scraping"];
+function monLaneCard(url,dot,label,diff,judge){
+  return '<div class="card" style="padding:11px 12px"><div style="font-size:18px;line-height:1">'+dot+'</div>'+
+    '<div class="mono" style="font-size:11px;word-break:break-all;margin:3px 0 6px;color:#71717a">'+url.replace(/^https?:\/\//,"")+'</div>'+
+    '<div style="font-size:12.5px"><b>'+label+'</b></div>'+
+    '<div class="mut" style="font-size:12px;margin-top:3px">'+(diff||"")+'</div>'+
+    '<div class="mut" style="font-size:11px;margin-top:5px">'+(judge||"")+'</div></div>';
 }
-function monCheck(){ monTick++; monRender(); document.getElementById("monMeta").textContent="ping #"+monTick+" · diffed vs server baseline · 2 credits"; }
-monRender();
+function monLanes(html){ document.getElementById("mlanes").innerHTML=html; }
+function monInit(){ monLanes(MON_URLS.map(function(u){return monLaneCard(u,"⚪","—","press Check now ▶","");}).join("")); }
+function monDot(p){
+  if(p.status==="new")return ["🆕","new (baseline set)"];
+  if(p.status==="removed")return ["❌","removed"];
+  if(p.status==="error")return ["⚠️","error"];
+  if(p.status==="changed"){ var sig=p.judgment&&(p.judgment.significant||p.judgment.isSignificant); return sig?["🔴","changed"]:["🟡","churn"]; }
+  return ["⚪","stable"];
+}
+async function monCheck(){
+  var meta=document.getElementById("monMeta");
+  if(!fcKey()){ meta.textContent="set your Firecrawl cloud key in the banner ↑ — this hits real /v2/monitor"; return; }
+  try{
+    var id=localStorage.getItem("cf_mon_id");
+    if(!id){
+      meta.textContent="⏳ POST api.firecrawl.dev/v2/monitor (creating the monitor) …";
+      var cr=await fetch(CLOUD_BASE+"/v2/monitor",{method:"POST",headers:cloudHeaders(),body:JSON.stringify({name:"playground change-feed",schedule:{cron:"0 0 * * *",timezone:"UTC"},notification:{email:{enabled:false}},targets:[{type:"scrape",urls:MON_URLS}],judgeEnabled:true})});
+      var cj=await cr.json(); id=(cj.monitor&&cj.monitor.id)||(cj.data&&cj.data.id)||cj.id;
+      if(!id){ meta.textContent="couldn’t create monitor (HTTP "+cr.status+") — is the key valid?"; return; }
+      localStorage.setItem("cf_mon_id",id);
+    }
+    meta.textContent="⏳ POST /v2/monitor/"+String(id).slice(0,8)+"…/run (server scrapes + judges each URL) …";
+    await fetch(CLOUD_BASE+"/v2/monitor/"+id+"/run",{method:"POST",headers:cloudHeaders()});
+    var t0=performance.now(), check=null;
+    for(var i=0;i<45;i++){
+      var lr=await fetch(CLOUD_BASE+"/v2/monitor/"+id+"/checks?limit=1",{headers:cloudHeaders()});
+      var lj=await lr.json(); var c=((lj.checks||lj.data)||[])[0];
+      if(c&&(c.status==="completed"||c.status==="partial")){ check=c; break; }
+      if(c&&c.status==="failed"){ meta.textContent="check failed server-side"; return; }
+      await new Promise(function(r){setTimeout(r,2000);});
+    }
+    if(!check){ meta.textContent="check didn’t finish in time — try Check now again"; return; }
+    var pr=await fetch(CLOUD_BASE+"/v2/monitor/"+id+"/checks/"+check.id+"?limit=100",{headers:cloudHeaders()});
+    var pj=await pr.json(); var pages=(pj.data&&pj.data.pages)||pj.pages||[];
+    var find=function(u){ var bare=u.replace(/^https?:\/\//,""); return pages.find(function(p){return p.url&&(p.url===u||p.url.replace(/^https?:\/\//,"").replace(/\/$/,"")===bare.replace(/\/$/,""));}); };
+    monLanes(MON_URLS.map(function(u){
+      var p=find(u); if(!p)return monLaneCard(u,"⚪","—","(no result)","");
+      var d=monDot(p), sig=p.judgment&&(p.judgment.significant||p.judgment.isSignificant);
+      var summary=(p.judgment&&(p.judgment.summary||p.judgment.overallImportance))||"";
+      var diff=(p.diff&&p.diff.text)?p.diff.text.split("\n").filter(Boolean).slice(0,2).join("  "):(p.status==="new"?"baseline stored server-side":"no change");
+      return monLaneCard(u,d[0],d[1],summary||diff,p.status==="changed"?("judge → significant: "+(sig?"true":"false")):"");
+    }).join(""));
+    var ms=Math.round(performance.now()-t0);
+    meta.innerHTML='<span style="color:#3730a3">☁️ <b>REAL /v2/monitor</b> · check '+String(check.id).slice(0,8)+'… · '+pages.length+' URLs judged server-side · '+ms+' ms</span>';
+  }catch(e){ meta.textContent="monitor error: "+((e&&e.message)||e); }
+}
+monInit();
 
 /* ---------- scroll-spy ---------- */
 const links=[...document.querySelectorAll("#nav a")];
