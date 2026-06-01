@@ -558,9 +558,9 @@ const EP=[
 
  {id:"agent",m:"POST",path:"/v2/agent",sync:false,title:"/agent — autonomous web actions (FIRE-1 / v3)",
   blurb:"Describe a goal in plain language; the agent navigates, clicks, fills, and extracts on its own. This is where v3 autonomy graduated to — the thing <code>/extract</code> sends you to when you ask for <code>v3-beta</code>. <b>Async</b>.",
-  examples:{"goal":{prompt:"Find the cheapest paid plan and return its name and monthly price",url:"https://www.firecrawl.dev/pricing"}},
+  examples:{"goal":{prompt:"Find the cheapest paid plan and return its name and monthly price",urls:["https://www.firecrawl.dev/pricing"]}},
   poll:true,
-  fields:[["prompt","string","the goal, in natural language"],["url","string","where to start"],["model","string","the agent model (v3 line)"]]},
+  fields:[["prompt","string","the goal, in natural language (required)"],["urls","string[]","starting URL(s) — optional; agent can browse freely if omitted"],["model","'spark-1-pro'|'spark-1-mini'","agent model (default: spark-1-pro)"],["schema","JSON Schema","structured output shape"],["maxCredits","number","hard cap on credits this run"],["strictConstrainToURLs","boolean","prevent the agent leaving the given domains"]]},
 
  {id:"monitor",m:"POST",path:"/v2/monitor",sync:false,title:"/monitor — get told when the web changes",
   blurb:"Schedules recurring change-tracking on URLs and notifies you on meaningful changes. <code>goal</code> + <code>judge_enabled</code> add an LLM judge that labels each diff meaningful-vs-noise — the server-side version of the change-feed's <code>significant</code> flag. <b>My change-feed example runs on this endpoint</b> (create → on-demand <code>/run</code> → read per-URL pages). <b>Heads-up:</b> each Run here creates a <i>real</i> monitor on your account — delete it from the dashboard after.",
