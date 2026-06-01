@@ -1,0 +1,197 @@
+[
+  {
+    "url": "https://docs.example.com/about",
+    "score": 100,
+    "rating": "A",
+    "summary": "100/100 (A) — clean",
+    "dimensions": {
+      "structureFidelity": 100,
+      "tablesCode": 100,
+      "inlineGlue": 100,
+      "boilerplateNoise": 100,
+      "tokenEfficiency": 100
+    },
+    "findings": [],
+    "artifacts": {
+      "markdown": "# About\n\nWe build tools for developers who love clean data and fast APIs.\n\n## Mission\n\nMake the web LLM-ready, one page at a time.",
+      "html": "<h1>About</h1><p>We build tools for developers who love clean data and fast APIs.</p><h2>Mission</h2><p>Make the web LLM-ready, one page at a time.</p>"
+    },
+    "meta": {
+      "config": "fixture",
+      "category": "clean-control"
+    }
+  },
+  {
+    "url": "https://shop.de/",
+    "score": 74,
+    "rating": "C",
+    "summary": "74/100 (C) — INLINE_GLUE ×1, HIGH_BOILERPLATE ×1",
+    "dimensions": {
+      "structureFidelity": 100,
+      "tablesCode": 100,
+      "inlineGlue": 75,
+      "boilerplateNoise": 53,
+      "tokenEfficiency": 58
+    },
+    "findings": [
+      {
+        "code": "INLINE_GLUE",
+        "severity": "high",
+        "evidence": "FunktionalFunktional",
+        "offset": 0
+      },
+      {
+        "code": "HIGH_BOILERPLATE",
+        "severity": "medium",
+        "evidence": "47% boilerplate"
+      }
+    ],
+    "artifacts": {
+      "markdown": "FunktionalFunktional\n\nWe use cookies. Accept All. Reject All. Manage Preferences.\n\n# Welcome\n\nShop our catalog of fine goods today.",
+      "html": "<button>Funktional</button><button>Funktional</button><div>We use cookies. Accept All. Reject All. Manage Preferences.</div><h1>Welcome</h1><p>Shop our catalog of fine goods today.</p>"
+    },
+    "meta": {
+      "config": "fixture",
+      "category": "cmp-cookie"
+    }
+  },
+  {
+    "url": "https://example.com/pricing",
+    "score": 61,
+    "rating": "C",
+    "summary": "61/100 (C) — TABLE_FLATTENED ×1",
+    "dimensions": {
+      "structureFidelity": 40,
+      "tablesCode": 0,
+      "inlineGlue": 100,
+      "boilerplateNoise": 100,
+      "tokenEfficiency": 100
+    },
+    "findings": [
+      {
+        "code": "TABLE_FLATTENED",
+        "severity": "medium",
+        "evidence": "1 of 1 table(s) flattened to prose"
+      }
+    ],
+    "artifacts": {
+      "markdown": "# Pricing\n\nPlan Price Pro $20",
+      "html": "<h1>Pricing</h1><table><tr><th>Plan</th><th>Price</th></tr><tr><td>Pro</td><td>$20</td></tr></table>"
+    },
+    "meta": {
+      "config": "fixture",
+      "category": "tables"
+    }
+  },
+  {
+    "url": "https://docs.example.com/install",
+    "score": 61,
+    "rating": "C",
+    "summary": "61/100 (C) — CODE_UNFENCED ×1, CODE_LANG_LOST ×1",
+    "dimensions": {
+      "structureFidelity": 40,
+      "tablesCode": 0,
+      "inlineGlue": 100,
+      "boilerplateNoise": 100,
+      "tokenEfficiency": 100
+    },
+    "findings": [
+      {
+        "code": "CODE_UNFENCED",
+        "severity": "medium",
+        "evidence": "1 of 1 code block(s) lost their fence"
+      },
+      {
+        "code": "CODE_LANG_LOST",
+        "severity": "low",
+        "evidence": "1 code block(s) lost their language hint"
+      }
+    ],
+    "artifacts": {
+      "markdown": "# Install\n\nnpm i firecrawl",
+      "html": "<h1>Install</h1><pre><code class=\"language-bash\">npm i firecrawl</code></pre>"
+    },
+    "meta": {
+      "config": "fixture",
+      "category": "code-docs"
+    }
+  },
+  {
+    "url": "https://app.example.com/",
+    "score": 80,
+    "rating": "B",
+    "summary": "80/100 (B) — HIGH_BOILERPLATE ×1",
+    "dimensions": {
+      "structureFidelity": 100,
+      "tablesCode": 100,
+      "inlineGlue": 100,
+      "boilerplateNoise": 25,
+      "tokenEfficiency": 29
+    },
+    "findings": [
+      {
+        "code": "HIGH_BOILERPLATE",
+        "severity": "medium",
+        "evidence": "75% boilerplate"
+      }
+    ],
+    "artifacts": {
+      "markdown": "Loading…\n\nHome\n\nMenu\n\nNavigation",
+      "html": "<div>Loading…</div><nav>Home Menu Navigation</nav>"
+    },
+    "meta": {
+      "config": "fixture",
+      "category": "spa"
+    }
+  },
+  {
+    "url": "https://news.example.com/article",
+    "score": 81,
+    "rating": "B",
+    "summary": "81/100 (B) — HIGH_BOILERPLATE ×1",
+    "dimensions": {
+      "structureFidelity": 100,
+      "tablesCode": 100,
+      "inlineGlue": 100,
+      "boilerplateNoise": 33,
+      "tokenEfficiency": 27
+    },
+    "findings": [
+      {
+        "code": "HIGH_BOILERPLATE",
+        "severity": "medium",
+        "evidence": "67% boilerplate"
+      }
+    ],
+    "artifacts": {
+      "markdown": "One real sentence about the product.\n\n© 2026 Acme Inc. All rights reserved. Terms of Service. Privacy Policy.",
+      "html": "<p>One real sentence about the product.</p><footer>© 2026 Acme Inc. All rights reserved. Terms of Service. Privacy Policy.</footer>"
+    },
+    "meta": {
+      "config": "fixture",
+      "category": "nav-heavy"
+    }
+  },
+  {
+    "url": "https://jp.example.com/tokyo",
+    "score": 100,
+    "rating": "A",
+    "summary": "100/100 (A) — clean",
+    "dimensions": {
+      "structureFidelity": 100,
+      "tablesCode": 100,
+      "inlineGlue": 100,
+      "boilerplateNoise": 100,
+      "tokenEfficiency": 100
+    },
+    "findings": [],
+    "artifacts": {
+      "markdown": "# 東京\n\nこれは東京についての記事です。多くの有用な情報が含まれています。",
+      "html": "<h1>東京</h1><p>これは東京についての記事です。多くの有用な情報が含まれています。</p>"
+    },
+    "meta": {
+      "config": "fixture",
+      "category": "i18n-charset"
+    }
+  }
+]
