@@ -550,8 +550,8 @@ const EP=[
   poll:true,
   fields:[["urls","string[]","the URLs to scrape (required)"],["formats","string[]","what to return for each"],["ignoreInvalidURLs","boolean","skip bad URLs instead of erroring"]]},
 
- {id:"extract",m:"POST",path:"/v2/extract",sync:false,title:"/extract — schema over many pages (async)",
-  blurb:"Hand it URLs + a schema (or just a prompt) and an LLM extracts structured data across all of them. <b>Async</b> (LLM × many pages): returns an <code>id</code> in &lt;1s → poll <code>GET /v2/extract/:id</code> until <code>status:'completed'</code>.",
+ {id:"extract",m:"POST",path:"/v2/extract",sync:false,title:"/extract — schema over many pages (async) ⚠️ deprecated",
+  blurb:"<b>⚠️ Deprecated.</b> The API now returns a warning: <em>\"Use /v2/scrape with formats including a 'json' format object.\"</em> For a single page, use <code>/v2/scrape</code> with <code>formats:[{type:'json',schema}]</code> — that's what the <a href='#schema'>Schema Lab</a> above does, inline and synchronous. Shown here for completeness; the response includes the deprecation notice.",
   examples:{"schema":{urls:["https://firecrawl.dev"],prompt:"Extract the product details",schema:{type:"object",properties:{name:{type:"string"},tagline:{type:"string"},endpoints:{type:"array",items:{type:"string"}}}}},"prompt only + web search":{urls:["https://firecrawl.dev"],prompt:"What does this company do and who are its competitors?",enableWebSearch:true}},
   poll:true,
   fields:[["urls","string[]","pages to extract from"],["prompt","string","what to pull (free-form if no schema)"],["schema","JSON Schema","the structured shape to return"],["systemPrompt","string","steer the extractor's behavior"],["enableWebSearch","boolean","let it follow external links / search to fill gaps"],["allowExternalLinks","boolean","same idea — go beyond the given URLs"],["agent","object","⚠️ legacy FIRE-1 path; agent.model:'v3-beta' is REJECTED → use /agent"]]},
