@@ -17,19 +17,22 @@
 | **scrape-quality** | LLM-readiness score for a scrape (`grade(doc)`) | [`scrape-quality`](https://github.com/xbt-a4224j/firecrawl/tree/scrape-quality/examples/scrape-quality) | `pnpm grade <url>` |
 | **Zod v4 fix** (issue 3300) | v4 schema silently dropped → empty extraction | [`fix/3300-zod-scrape-schema`](https://github.com/xbt-a4224j/firecrawl/tree/fix/3300-zod-scrape-schema) | `npx jest scrape-json-schema` |
 | **glue fix** (issue 3583) | adjacent `<button>`/`<label>` glued in HTML→md | [`fix/3583-inline-glue`](https://github.com/xbt-a4224j/firecrawl/tree/fix/3583-inline-glue) | `npx jest html-to-markdown -t "issue 3583"` |
-| **🎮 API playground** | interactive, no-key explainer for every v2 endpoint + a Schema Lab + a sync-vs-async walkthrough | this branch (`playground.html`) | **[▶ see the demo ↓](#the-playground)** · open `playground.html` |
+| **🎮 API playground** | interactive, **live-call** explainer (local self-host + cloud) for every v2 endpoint + a Schema Lab + bug-fix receipts | this branch (`playground.html`) | **[▶ see the demo ↓](#the-playground)** · serve `playground.html` |
 
 ---
 
 ## The playground
 
-A self-contained, **no-API-key** playground I built to internalize the v2 surface — and make it teachable.
-Clone this branch and open `playground.html` in any browser — nothing calls the network, every response is a
-realistic sample, so you can explore the request/response *shapes* safely. Here's the full tour:
+An interactive playground I built to internalize the v2 surface — and make it teachable. Serve it over
+http (`python3 -m http.server`) and every **Run** is a **real call**, badged so you can see where it went:
+`/scrape` + `/map` hit a **local self-host** (🟢 proof the stack is up); everything else, plus any
+structured-`json` extraction, hits **Firecrawl cloud** (☁️ paste a key in the banner — stored only in your
+browser, never committed). Each result shows status · latency · bytes · a unique `id`; anything that can't
+round-trip falls back to a clearly-labeled sample so it never breaks. Here's the full tour:
 
 https://github.com/user-attachments/assets/6e121ac5-a5b8-4ed1-ada7-8723c3fde015
 
-*Player not loading? [Watch the GIF](assets/playground-demo.gif) · or clone this branch and open `playground.html`.*
+*Player not loading? [Watch the GIF](assets/playground-demo.gif) · or clone this branch and serve `playground.html` (`python3 -m http.server`).*
 
 - **Every endpoint** — scrape / map / search / crawl / batch / extract / agent / monitor — with editable
   request bodies and realistic responses, plus an annotated table of every key parameter.
