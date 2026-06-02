@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="910" viewBox="0 0 920 910" font-family="'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <style>
+      .mono { font-family: 'SF Mono', 'Menlo', Consolas, monospace; }
+      .title { font-weight: 700; }
+    </style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-color="#1f2937" flood-opacity="0.14"/>
+    </filter>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#166534"/>
+    </marker>
+  </defs>
+
+  <!-- background -->
+  <rect width="920" height="910" fill="#f8f9fa"/>
+
+  <!-- TITLE -->
+  <text x="460" y="42" text-anchor="middle" class="title" font-size="24" fill="#1f2937">Before / after — turning a silent 200 into a signal</text>
+  <text x="460" y="66" text-anchor="middle" font-size="13.5" fill="#6b7280">Adding a <tspan class="mono" fill="#374151">quality(doc)</tspan> signal to Firecrawl's scrape pipeline</text>
+
+  <!-- column headers -->
+  <rect x="40" y="86" width="390" height="38" rx="10" fill="#c0392b"/>
+  <text x="235" y="111" text-anchor="middle" class="title" font-size="15.5" fill="#ffffff">TODAY: the silent 200</text>
+
+  <rect x="490" y="86" width="390" height="38" rx="10" fill="#166534"/>
+  <text x="685" y="111" text-anchor="middle" class="title" font-size="15.5" fill="#ffffff">WITH quality(doc)</text>
+
+  <text x="235" y="141" text-anchor="middle" font-size="12" fill="#9b3226" font-style="italic">no quality signal</text>
+  <text x="685" y="141" text-anchor="middle" font-size="12" fill="#15803d" font-style="italic">one pure function in the pipeline</text>
+
+  <!-- ===================== LEFT COLUMN ===================== -->
+  <g>
+    <!-- 1. scrape(url) -->
+    <rect x="75" y="158" width="320" height="38" rx="9" fill="#fff0f0" stroke="#e57373" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="235" y="182" text-anchor="middle" class="mono" font-size="14.5" fill="#c0392b">scrape(url) returns</text>
+    <path d="M235,196 L235,214" stroke="#c0392b" stroke-width="2" marker-end="url(#arrowRed)"/>
+
+    <!-- 2. response box -->
+    <rect x="65" y="216" width="340" height="92" rx="9" fill="#ffffff" stroke="#e57373" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="86" y="240" class="mono" font-size="13" fill="#374151">{</text>
+    <text x="100" y="259" class="mono" font-size="13" fill="#15803d">success: true<tspan fill="#374151">,</tspan></text>
+    <text x="100" y="278" class="mono" font-size="13" fill="#15803d">statusCode: 200<tspan fill="#374151">,</tspan></text>
+    <text x="100" y="297" class="mono" font-size="13" fill="#c0392b">markdown: ""</text>
+    <text x="384" y="297" text-anchor="end" class="mono" font-size="13" fill="#374151">}</text>
+    <text x="235" y="332" text-anchor="middle" font-size="11.5" fill="#9b3226">looks fine — nothing flags it</text>
+    <path d="M235,338 L235,356" stroke="#c0392b" stroke-width="2" marker-end="url(#arrowRed)"/>
+
+    <!-- 3. user confused -->
+    <rect x="75" y="358" width="320" height="38" rx="9" fill="#fff0f0" stroke="#e57373" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="235" y="382" text-anchor="middle" font-size="13.5" fill="#7f1d1d">User gets unusable output, confused</text>
+    <path d="M235,396 L235,414" stroke="#c0392b" stroke-width="2" marker-end="url(#arrowRed)"/>
+
+    <!-- 4. files issue -->
+    <rect x="75" y="416" width="320" height="72" rx="9" fill="#ffffff" stroke="#e57373" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="235" y="437" text-anchor="middle" class="title" font-size="13" fill="#7f1d1d">Files a GitHub issue</text>
+    <line x1="92" y1="447" x2="378" y2="447" stroke="#fbcfcf" stroke-width="1"/>
+    <text x="235" y="465" text-anchor="middle" class="mono" font-size="11" fill="#6b7280">issue #385</text>
+    <text x="235" y="481" text-anchor="middle" font-size="11.5" fill="#374151" font-style="italic">"pageStatusCode is 200, but no content is returned"</text>
+    <path d="M235,488 L235,506" stroke="#c0392b" stroke-width="2" marker-end="url(#arrowRed)"/>
+
+    <!-- 5. repro -->
+    <rect x="75" y="508" width="320" height="116" rx="9" fill="#ffffff" stroke="#e57373" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="235" y="529" text-anchor="middle" class="title" font-size="13" fill="#7f1d1d">Maintainer repros + diagnoses by hand</text>
+    <!-- quote 1 -->
+    <rect x="92" y="539" width="286" height="32" rx="6" fill="#fdf2f2" stroke="#f3b5b5" stroke-width="1"/>
+    <rect x="92" y="539" width="4" height="32" rx="2" fill="#e57373"/>
+    <text x="108" y="559" font-size="12.5" fill="#9b3226" font-style="italic">"it's an iframe 😰"</text>
+    <!-- quote 2 -->
+    <rect x="92" y="577" width="286" height="32" rx="6" fill="#fdf2f2" stroke="#f3b5b5" stroke-width="1"/>
+    <rect x="92" y="577" width="4" height="32" rx="2" fill="#e57373"/>
+    <text x="108" y="597" font-size="12.5" fill="#9b3226" font-style="italic">"loads on scroll — try waitFor: 500"</text>
+    <path d="M235,624 L235,642" stroke="#c0392b" stroke-width="2" marker-end="url(#arrowRed)"/>
+
+    <!-- 6. days later PR -->
+    <rect x="75" y="644" width="320" height="46" rx="9" fill="#fff0f0" stroke="#e57373" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="235" y="664" text-anchor="middle" class="title" font-size="13.5" fill="#7f1d1d">Days later: a one-off, per-site PR</text>
+    <text x="235" y="681" text-anchor="middle" font-size="11" fill="#9b3226" font-style="italic">fixes that one site, doesn't generalize</text>
+
+    <!-- bottom label left -->
+    <rect x="95" y="712" width="280" height="38" rx="19" fill="#c0392b"/>
+    <text x="235" y="736" text-anchor="middle" class="title" font-size="14.5" fill="#ffffff">Reactive · manual · slow</text>
+  </g>
+
+  <!-- ===================== CENTER DIVIDER ===================== -->
+  <line x1="460" y1="156" x2="460" y2="760" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="4 5"/>
+
+  <!-- ===================== RIGHT COLUMN ===================== -->
+  <g>
+    <!-- 1. scrape(url) -->
+    <rect x="525" y="158" width="320" height="38" rx="9" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="685" y="182" text-anchor="middle" class="mono" font-size="14.5" fill="#166534">scrape(url) returns</text>
+    <path d="M685,196 L685,214" stroke="#166534" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+    <!-- 2. quality(doc) runs -->
+    <rect x="525" y="216" width="320" height="58" rx="9" fill="#ffffff" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="685" y="242" text-anchor="middle" font-size="14.5" fill="#166534"><tspan class="mono title">quality(doc)</tspan> runs</text>
+    <g>
+      <rect x="567" y="250" width="66" height="18" rx="9" fill="#dcfce7"/>
+      <text x="600" y="263" text-anchor="middle" font-size="10.5" fill="#15803d">pure</text>
+      <rect x="639" y="250" width="62" height="18" rx="9" fill="#dcfce7"/>
+      <text x="670" y="263" text-anchor="middle" class="mono" font-size="10.5" fill="#15803d">~1ms</text>
+      <rect x="707" y="250" width="70" height="18" rx="9" fill="#dcfce7"/>
+      <text x="742" y="263" text-anchor="middle" font-size="10.5" fill="#15803d">no LLM</text>
+    </g>
+    <path d="M685,274 L685,292" stroke="#166534" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+    <!-- 3. enriched response -->
+    <rect x="510" y="294" width="350" height="150" rx="9" fill="#ffffff" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="528" y="317" class="mono" font-size="12.5" fill="#374151">{</text>
+    <text x="541" y="336" class="mono" font-size="12.5" fill="#374151">statusCode: <tspan fill="#15803d">200</tspan>,</text>
+    <text x="541" y="355" class="mono" font-size="12.5" fill="#374151">quality: {</text>
+    <text x="558" y="374" class="mono" font-size="12.5" fill="#374151">rating: <tspan fill="#c0392b">"F"</tspan>,</text>
+    <text x="558" y="393" class="mono" font-size="12.5" fill="#374151">findings: [{</text>
+    <text x="575" y="411" class="mono" font-size="11.5" fill="#374151">code: <tspan fill="#b45309">"JS_SHELL"</tspan>,</text>
+    <text x="575" y="428" class="mono" font-size="11.5" fill="#374151">hint: <tspan fill="#15803d">"page didn't hydrate —</tspan></text>
+    <text x="610" y="443" class="mono" font-size="11.5" fill="#15803d">try waitFor or a browser engine"</text>
+    <text x="836" y="443" text-anchor="end" class="mono" font-size="11.5" fill="#374151">}]}}</text>
+    <path d="M685,444 L685,462" stroke="#166534" stroke-width="2" marker-end="url(#arrowGreen)"/>
+    <text x="685" y="479" text-anchor="middle" font-size="11.5" fill="#15803d" font-style="italic">the failure now carries its own explanation</text>
+
+    <!-- fan-out connectors -->
+    <circle cx="685" cy="489" r="4" fill="#166534"/>
+    <path d="M685,489 C685,512 592,510 592,532" stroke="#166534" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+    <path d="M685,489 C685,512 778,510 778,532" stroke="#166534" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+
+    <!-- THREE outcome branches -->
+    <!-- branch 1 -->
+    <rect x="512" y="534" width="160" height="74" rx="9" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="592" y="560" text-anchor="middle" class="title" font-size="12" fill="#166534">User self-serves</text>
+    <text x="592" y="577" text-anchor="middle" font-size="11.5" fill="#15803d">from the hint</text>
+    <text x="592" y="597" text-anchor="middle" font-size="10.5" fill="#16a34a" font-style="italic">no issue filed</text>
+
+    <!-- branch 2 (center, dropped lower) -->
+    <rect x="605" y="624" width="160" height="74" rx="9" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="685" y="650" text-anchor="middle" class="title" font-size="12" fill="#166534">System gates /</text>
+    <text x="685" y="667" text-anchor="middle" font-size="11.5" fill="#15803d">retries</text>
+    <text x="685" y="687" text-anchor="middle" font-size="10.5" fill="#16a34a" font-style="italic">automatically</text>
+    <path d="M685,493 L685,622" stroke="#166534" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+
+    <!-- branch 3 -->
+    <rect x="698" y="534" width="160" height="74" rx="9" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+    <text x="778" y="554" text-anchor="middle" class="title" font-size="12" fill="#166534">Logged →</text>
+    <text x="778" y="571" text-anchor="middle" font-size="11.5" fill="#15803d">dashboard sees it</text>
+    <text x="778" y="592" text-anchor="middle" font-size="10.5" fill="#16a34a" font-style="italic">before users do</text>
+
+    <!-- bottom label right -->
+    <rect x="545" y="712" width="280" height="38" rx="19" fill="#166534"/>
+    <text x="685" y="736" text-anchor="middle" class="title" font-size="14.5" fill="#ffffff">Proactive · automatic · instant</text>
+  </g>
+
+  <!-- ===================== PUNCHLINE BANNER ===================== -->
+  <rect x="40" y="800" width="840" height="64" rx="14" fill="#1f2937" filter="url(#shadow)"/>
+  <text x="460" y="830" text-anchor="middle" class="title" font-size="16" fill="#ffffff">Same 200.</text>
+  <text x="460" y="853" text-anchor="middle" font-size="14.5" fill="#d1d5db">The difference is whether anything looked at what's inside it.</text>
+</svg>

@@ -1,0 +1,54 @@
+{
+  "_about": "Live corpus for the scrape-quality signal (apps/api/src/lib/quality.ts). Each row is bucketed by what it demonstrates, not just 'good/bad'. 'expect' is the behavior we want to observe: a grade ('A'), a finding code ('JS_SHELL', ...), or 'ERROR' (a loud hard-block — the contrast that defines the silent-200 scope). Issue numbers point at the documented customer pain points each bucket maps to. Sites drift; this is best-effort and the deterministic gate is quality.test.ts.",
+  "_buckets": {
+    "engine_delta": "client-rendered: plain fetch silently returns a 200 with a near-empty shell; forcing the browser engine recovers the content. Run with --engines to see the flip / content recovery.",
+    "silent_200": "fetch returns a 200 the signal grades F; here the browser alone doesn't fix it (needs auth or a stealth proxy) — the signal flags it either way.",
+    "hard_block": "anti-bot responds with a loud 5xx — the engine errors, quality() never runs. OUT of scope by design; included as the contrast to a SILENT 200.",
+    "charset": "non-Latin pages. The pipeline decodes charset correctly today → grade A. GARBLED is the regression guard, and correctly does NOT fire here.",
+    "boilerplate": "real homepages with heavy nav/cookie/footer chrome. HIGH_BOILERPLATE stays conservative — full homepages are not flagged (no false positives).",
+    "control": "clean, server-rendered content. Must grade A — the false-positive floor at scale."
+  },
+  "corpus": [
+    { "url": "https://excalidraw.com", "mode": "engine_delta", "issue": 1345, "expect": "JS_SHELL", "note": "pure client-rendered SPA — empty #root on fetch, toolbar/menu text after render. The clean grade flip." },
+    { "url": "https://quotes.toscrape.com/js/", "mode": "engine_delta", "issue": 1297, "expect": "A", "note": "purpose-built JS-rendering test page; fetch sees ~no quotes, browser renders all of them (content recovery, grade stays A — a calibration point)." },
+    { "url": "https://www.desmos.com/calculator", "mode": "engine_delta", "issue": 2375, "expect": "A", "note": "SPA calculator — small static shell on fetch, ~10x more UI text after render." },
+    { "url": "https://vuejs-templates.github.io/webpack/", "mode": "engine_delta", "issue": 1297, "expect": "A", "note": "Vue SPA — mild content recovery with a browser." },
+    { "url": "https://todomvc.com/examples/react/dist/", "mode": "engine_delta", "issue": 1297, "expect": "A", "note": "React SPA reference app — empty-ish shell, hydrates client-side." },
+    { "url": "https://app.diagrams.net", "mode": "engine_delta", "issue": 2375, "expect": "A", "note": "draw.io SPA — candidate; the grid decides whether it flips." },
+
+    { "url": "https://x.com", "mode": "silent_200", "issue": 1345, "expect": "JS_SHELL", "note": "200 + JS shell on fetch; the browser hits the same JS/auth wall — needs the x-twitter engine. Signal flags it either way." },
+    { "url": "https://vscode.dev", "mode": "silent_200", "issue": 1345, "expect": "JS_SHELL", "note": "Monaco SPA — empty shell, no text even with a browser without interaction." },
+
+    { "url": "https://www.tripadvisor.com", "mode": "hard_block", "issue": 2350, "expect": "ERROR", "note": "anti-bot 5xx — loud failure, not a silent 200." },
+    { "url": "https://www.g2.com", "mode": "hard_block", "issue": 495, "expect": "ERROR", "note": "Cloudflare hard-block." },
+    { "url": "https://www.vivino.com", "mode": "hard_block", "issue": 2350, "expect": "ERROR", "note": "anti-bot hard-block." },
+    { "url": "https://poloniex.com", "mode": "hard_block", "issue": 495, "expect": "ERROR", "note": "anti-bot hard-block." },
+    { "url": "https://www.glassdoor.com", "mode": "hard_block", "issue": 2413, "expect": "ERROR", "note": "anti-bot hard-block (#2413 — a charged scrape that returned nothing usable)." },
+
+    { "url": "https://www.asahi.com", "mode": "charset", "issue": 1142, "expect": "A", "note": "Japanese news — charset decoded correctly; GARBLED correctly silent." },
+    { "url": "https://www.chosun.com", "mode": "charset", "issue": 547, "expect": "A", "note": "Korean news — decoded correctly." },
+    { "url": "https://www.zoomit.ir", "mode": "charset", "issue": 547, "expect": "A", "note": "Persian (RTL) — decoded correctly." },
+    { "url": "https://www.people.com.cn", "mode": "charset", "issue": 1277, "expect": "A", "note": "Chinese (historically gbk) — decoded correctly today." },
+
+    { "url": "https://www.lsu.edu", "mode": "boilerplate", "issue": 284, "expect": "A", "note": "university homepage — heavy nav/footer, still real content -> not flagged." },
+    { "url": "https://global.abb", "mode": "boilerplate", "issue": 288, "expect": "A", "note": "corporate homepage — conservative threshold holds." },
+    { "url": "https://www.simon.com", "mode": "boilerplate", "issue": 540, "expect": "A", "note": "mall directory — chrome-heavy but not flagged." },
+    { "url": "https://www.apexcleanenergy.com", "mode": "boilerplate", "issue": 1564, "expect": "A", "note": "marketing homepage." },
+
+    { "url": "https://jestjs.io", "mode": "control", "issue": null, "expect": "A", "note": "docs page — the canonical clean A." },
+    { "url": "https://en.wikipedia.org/wiki/Web_scraping", "mode": "control", "issue": null, "expect": "A", "note": "long article." },
+    { "url": "https://en.wikipedia.org/wiki/Cloudflare", "mode": "control", "issue": null, "expect": "A", "note": "article ABOUT Cloudflare — must NOT trip SOFT_BOT_WALL." },
+    { "url": "https://blog.cloudflare.com/cloudflare-radar-2024-year-in-review", "mode": "control", "issue": null, "expect": "A", "note": "regression: a 404 here once falsely tripped SOFT_BOT_WALL on the 'cloudflare' image URL. Must stay clean." },
+    { "url": "https://example.com", "mode": "control", "issue": null, "expect": "A", "note": "minimal but real." },
+    { "url": "https://docs.firecrawl.dev/introduction", "mode": "control", "issue": null, "expect": "A", "note": "Firecrawl's own docs." },
+    { "url": "https://www.gnu.org/licenses/gpl-3.0.en.html", "mode": "control", "issue": null, "expect": "A", "note": "long static legal text." },
+    { "url": "https://news.ycombinator.com", "mode": "control", "issue": null, "expect": "A", "note": "server-rendered, link-dense but real content." },
+    { "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP", "mode": "control", "issue": null, "expect": "A", "note": "MDN docs." },
+    { "url": "https://www.rfc-editor.org/rfc/rfc2616", "mode": "control", "issue": null, "expect": "A", "note": "plain-text RFC." },
+    { "url": "https://httpbin.org/html", "mode": "control", "issue": null, "expect": "A", "note": "static HTML article (Moby Dick excerpt)." },
+    { "url": "https://www.python.org", "mode": "control", "issue": null, "expect": "A", "note": "homepage with real content." },
+    { "url": "https://docs.python.org/3/tutorial/index.html", "mode": "control", "issue": null, "expect": "A", "note": "docs." },
+    { "url": "https://en.wikipedia.org/wiki/CAPTCHA", "mode": "control", "issue": null, "expect": "A", "note": "article ABOUT CAPTCHAs — another SOFT_BOT_WALL false-positive guard." },
+    { "url": "https://www.iana.org/help/example-domains", "mode": "control", "issue": null, "expect": "A", "note": "short institutional page." }
+  ]
+}

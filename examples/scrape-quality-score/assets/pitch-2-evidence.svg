@@ -1,0 +1,256 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="940" viewBox="0 0 1000 940" font-family="'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="arrowBlue" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#1565a8"/>
+    </marker>
+    <marker id="arrowGrey" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#8a93a0"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#166534"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#c0392b"/>
+    </marker>
+    <marker id="duel" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#c0392b"/>
+    </marker>
+    <marker id="duelStart" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M8,0 L0,3 L8,6 Z" fill="#c0392b"/>
+    </marker>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-color="#1c2733" flood-opacity="0.18"/>
+    </filter>
+    <filter id="heroShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#1565a8" flood-opacity="0.30"/>
+    </filter>
+  </defs>
+
+  <!-- background -->
+  <rect width="1000" height="940" fill="#f8f9fa"/>
+
+  <!-- ===================== TITLE ===================== -->
+  <text x="500" y="42" text-anchor="middle" font-size="23" font-weight="700" fill="#1c2733">The evidence — grievances &#8594; one primitive &#8594; a pile of stalled PRs</text>
+  <text x="500" y="66" text-anchor="middle" font-size="13.5" fill="#5b6672">Real Firecrawl GitHub issues cluster into 5 cheap checks. Today they&#8217;re patched one site at a time, and the structural fixes can&#8217;t land.</text>
+
+  <!-- column headers -->
+  <text x="175" y="104" text-anchor="middle" font-size="14.5" font-weight="700" fill="#3a444f">THE GRIEVANCES</text>
+  <text x="175" y="121" text-anchor="middle" font-size="11.5" fill="#7b8593">real GitHub issues</text>
+
+  <text x="500" y="104" text-anchor="middle" font-size="14.5" font-weight="700" fill="#1565a8">THE PRIMITIVE</text>
+  <text x="500" y="121" text-anchor="middle" font-size="11.5" fill="#3d7bb5">quality(doc) — 5 heuristics</text>
+
+  <text x="828" y="104" text-anchor="middle" font-size="14.5" font-weight="700" fill="#3a444f">HOW IT&#8217;S FIXED TODAY</text>
+  <text x="828" y="121" text-anchor="middle" font-size="11.5" fill="#7b8593">reactive patches &amp; stalled reworks</text>
+
+  <!-- ===================== LEFT COLUMN: grievance cards ===================== -->
+  <!-- card geometry: x=40 w=270 ; rows centered to feed the primitive -->
+
+  <!-- Card 1: Empty / silent 200 -->
+  <g filter="url(#soft)">
+    <rect x="40" y="146" width="270" height="76" rx="9" fill="#ffffff" stroke="#d4dae1" stroke-width="1"/>
+    <rect x="40" y="146" width="5" height="76" rx="2.5" fill="#8a93a0"/>
+  </g>
+  <text x="58" y="170" font-size="13.5" font-weight="700" fill="#2b3540">Empty / silent 200</text>
+  <text x="58" y="191" font-size="11.5" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#46505b">#385<tspan fill="#9aa3ae">·7</tspan>  #1309<tspan fill="#9aa3ae">·14</tspan>  #2316<tspan fill="#9aa3ae"> open</tspan></text>
+  <text x="58" y="210" font-size="11.5" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#46505b">#684   #666</text>
+
+  <!-- Card 2: Blocked / bot wall -->
+  <g filter="url(#soft)">
+    <rect x="40" y="234" width="270" height="76" rx="9" fill="#ffffff" stroke="#d4dae1" stroke-width="1"/>
+    <rect x="40" y="234" width="5" height="76" rx="2.5" fill="#8a93a0"/>
+  </g>
+  <text x="58" y="258" font-size="13.5" font-weight="700" fill="#2b3540">Blocked / bot wall</text>
+  <text x="58" y="279" font-size="11.5" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#46505b">#2350<tspan fill="#9aa3ae">·25</tspan>  #495<tspan fill="#9aa3ae">·14</tspan>  #2257</text>
+  <text x="58" y="298" font-size="11.5" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#46505b">#2413 <tspan fill="#c0392b" font-style="italic">&#8220;still using credit&#8221;</tspan></text>
+
+  <!-- Card 3: Boilerplate leaks -->
+  <g filter="url(#soft)">
+    <rect x="40" y="322" width="270" height="60" rx="9" fill="#ffffff" stroke="#d4dae1" stroke-width="1"/>
+    <rect x="40" y="322" width="5" height="60" rx="2.5" fill="#8a93a0"/>
+  </g>
+  <text x="58" y="346" font-size="13.5" font-weight="700" fill="#2b3540">Boilerplate leaks</text>
+  <text x="58" y="367" font-size="11.5" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#46505b">#284<tspan fill="#9aa3ae">·9</tspan>  #1564  #1  #748</text>
+
+  <!-- Card 4: Garbled / encoding -->
+  <g filter="url(#soft)">
+    <rect x="40" y="394" width="270" height="76" rx="9" fill="#ffffff" stroke="#d4dae1" stroke-width="1"/>
+    <rect x="40" y="394" width="5" height="76" rx="2.5" fill="#8a93a0"/>
+  </g>
+  <text x="58" y="418" font-size="13.5" font-weight="700" fill="#2b3540">Garbled / encoding</text>
+  <text x="58" y="439" font-size="11.5" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#46505b">#547  #1142<tspan fill="#9aa3ae"> jp</tspan>  #1277<tspan fill="#9aa3ae"> gbk</tspan></text>
+  <text x="58" y="458" font-size="11.5" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#46505b">#306<tspan fill="#9aa3ae"> PDF</tspan>  #1153<tspan fill="#9aa3ae"> ePub</tspan></text>
+
+  <!-- Card 5: JS-shell / dynamic -->
+  <g filter="url(#soft)">
+    <rect x="40" y="482" width="270" height="60" rx="9" fill="#ffffff" stroke="#d4dae1" stroke-width="1"/>
+    <rect x="40" y="482" width="5" height="60" rx="2.5" fill="#8a93a0"/>
+  </g>
+  <text x="58" y="506" font-size="13.5" font-weight="700" fill="#2b3540">JS-shell / dynamic</text>
+  <text x="58" y="527" font-size="11.5" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#46505b">#215  #2375  #1297</text>
+
+  <!-- ===================== ARROWS  left clusters -> primitive ===================== -->
+  <!-- primitive box: x=360 y=180 w=280 h=380 ; left edge x=360, vertical center ~370 -->
+  <!-- each arrow targets the matching heuristic row inside the hero -->
+  <path d="M310,184 C338,200 332,238 358,238" fill="none" stroke="#8a93a0" stroke-width="1.6" marker-end="url(#arrowGrey)"/>
+  <path d="M310,272 C336,290 332,320 358,320" fill="none" stroke="#8a93a0" stroke-width="1.6" marker-end="url(#arrowGrey)"/>
+  <path d="M310,352 C338,368 334,400 358,400" fill="none" stroke="#8a93a0" stroke-width="1.6" marker-end="url(#arrowGrey)"/>
+  <path d="M310,432 C338,432 332,290 358,290" fill="none" stroke="#8a93a0" stroke-width="1.6" marker-end="url(#arrowGrey)"/>
+  <path d="M310,512 C342,500 332,452 358,452" fill="none" stroke="#8a93a0" stroke-width="1.6" marker-end="url(#arrowGrey)"/>
+  <text x="332" y="556" text-anchor="middle" font-size="10.5" font-style="italic" fill="#9aa3ae">one primitive covers the whole cluster</text>
+
+  <!-- ===================== MIDDLE: HERO primitive ===================== -->
+  <g filter="url(#heroShadow)">
+    <rect x="360" y="180" width="280" height="372" rx="14" fill="#ffffff" stroke="#1565a8" stroke-width="2.5"/>
+  </g>
+  <!-- hero header band -->
+  <path d="M360,194 a14,14 0 0 1 14,-14 h252 a14,14 0 0 1 14,14 v34 h-280 z" fill="#1565a8"/>
+  <text x="500" y="203" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" font-family="'SF Mono',Menlo,Consolas,monospace">quality(doc)</text>
+  <text x="500" y="220" text-anchor="middle" font-size="10.5" fill="#cfe2f2">5 heuristics &#183; one function</text>
+
+  <!-- heuristic rows -->
+  <!-- isEmpty -->
+  <text x="378" y="242" font-size="13" font-weight="700" fill="#1565a8" font-family="'SF Mono',Menlo,Consolas,monospace">isEmpty</text>
+  <text x="378" y="258" font-size="10.5" fill="#5b6672">markdown length &#8776; 0</text>
+  <line x1="378" y1="269" x2="622" y2="269" stroke="#e3e8ee" stroke-width="1"/>
+
+  <!-- garbled -->
+  <text x="378" y="288" font-size="13" font-weight="700" fill="#1565a8" font-family="'SF Mono',Menlo,Consolas,monospace">garbled</text>
+  <text x="378" y="304" font-size="10.5" fill="#5b6672">replacement / control-char ratio, mojibake</text>
+  <line x1="378" y1="315" x2="622" y2="315" stroke="#e3e8ee" stroke-width="1"/>
+
+  <!-- softBotWall -->
+  <text x="378" y="334" font-size="13" font-weight="700" fill="#1565a8" font-family="'SF Mono',Menlo,Consolas,monospace">softBotWall</text>
+  <text x="378" y="350" font-size="10.5" fill="#5b6672">keyword match (&#8220;checking your browser&#8221;)</text>
+  <line x1="378" y1="361" x2="622" y2="361" stroke="#e3e8ee" stroke-width="1"/>
+
+  <!-- boilerplateRatio -->
+  <text x="378" y="380" font-size="13" font-weight="700" fill="#1565a8" font-family="'SF Mono',Menlo,Consolas,monospace">boilerplateRatio</text>
+  <text x="378" y="396" font-size="10.5" fill="#5b6672">nav / footer &#247; content</text>
+  <line x1="378" y1="407" x2="622" y2="407" stroke="#e3e8ee" stroke-width="1"/>
+
+  <!-- jsShell -->
+  <text x="378" y="426" font-size="13" font-weight="700" fill="#1565a8" font-family="'SF Mono',Menlo,Consolas,monospace">jsShell</text>
+  <text x="378" y="442" font-size="10.5" fill="#5b6672">tiny markdown + large script-heavy html</text>
+
+  <!-- tag chips -->
+  <g font-size="10.5" font-weight="600">
+    <rect x="378" y="466" width="46" height="20" rx="10" fill="#e8f1f9" stroke="#bcd6ec"/>
+    <text x="401" y="480" text-anchor="middle" fill="#1565a8">pure</text>
+    <rect x="430" y="466" width="52" height="20" rx="10" fill="#e8f1f9" stroke="#bcd6ec"/>
+    <text x="456" y="480" text-anchor="middle" fill="#1565a8">~1ms</text>
+    <rect x="488" y="466" width="62" height="20" rx="10" fill="#e8f1f9" stroke="#bcd6ec"/>
+    <text x="519" y="480" text-anchor="middle" fill="#1565a8">no LLM</text>
+    <rect x="556" y="466" width="70" height="20" rx="10" fill="#e8f1f9" stroke="#bcd6ec"/>
+    <text x="591" y="480" text-anchor="middle" fill="#1565a8">~120 LOC</text>
+  </g>
+  <text x="500" y="512" text-anchor="middle" font-size="11" fill="#3d7bb5">deterministic signal every scrape can carry</text>
+  <text x="500" y="534" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1565a8">&#8595;  what it would unblock  &#8595;</text>
+
+  <!-- ===================== ARROWS primitive -> right column ===================== -->
+  <!-- to merged group (top right) -->
+  <path d="M640,330 C690,300 700,250 768,250" fill="none" stroke="#1565a8" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <!-- to graveyard group (bottom right) -->
+  <path d="M640,420 C700,470 700,560 768,560" fill="none" stroke="#1565a8" stroke-width="2" marker-end="url(#arrowRed)"/>
+
+  <!-- ===================== RIGHT COLUMN ===================== -->
+  <!-- TOP GROUP: merged / reactive -->
+  <g filter="url(#soft)">
+    <rect x="770" y="146" width="200" height="0" fill="none"/>
+  </g>
+  <rect x="690" y="146" width="280" height="186" rx="11" fill="#f1f8f2" stroke="#9ccaa6" stroke-width="1.5"/>
+  <rect x="690" y="146" width="280" height="30" rx="11" fill="#166534"/>
+  <rect x="690" y="160" width="280" height="16" fill="#166534"/>
+  <text x="704" y="166" font-size="12.5" font-weight="700" fill="#ffffff">MERGED &#8212; but reactive, one site per PR</text>
+
+  <g font-size="11.5">
+    <text x="704" y="198" font-family="'SF Mono',Menlo,Consolas,monospace" font-weight="700" fill="#166534">#275</text>
+    <text x="748" y="198" fill="#3a444f"><tspan font-family="'SF Mono',Menlo,Consolas,monospace">removeTags</tspan> — manual config</text>
+
+    <text x="704" y="222" font-family="'SF Mono',Menlo,Consolas,monospace" font-weight="700" fill="#166534">#239</text>
+    <text x="748" y="222" fill="#3a444f">scroll-xpath &#8220;for readme docs&#8221;</text>
+    <text x="748" y="237" font-size="10" fill="#7b8593">one site class</text>
+
+    <text x="704" y="261" font-family="'SF Mono',Menlo,Consolas,monospace" font-weight="700" fill="#166534">#1221</text>
+    <text x="752" y="261" fill="#3a444f">charset re-decode</text>
+    <text x="752" y="276" font-size="10" fill="#7b8593">triggered by one Japanese page</text>
+
+    <text x="704" y="300" font-family="'SF Mono',Menlo,Consolas,monospace" font-weight="700" fill="#166534">#318</text>
+    <text x="748" y="300" fill="#3a444f">regex for google-drive PDFs <tspan font-family="'SF Mono',Menlo,Consolas,monospace" fill="#7b8593">(+1/&#8722;1)</tspan></text>
+  </g>
+  <text x="704" y="324" font-size="11" font-style="italic" fill="#166534">whack-a-mole — patches one manifestation at a time</text>
+
+  <!-- BOTTOM GROUP: unmerged graveyard -->
+  <rect x="690" y="356" width="280" height="320" rx="11" fill="#fbeeec" stroke="#e2a9a1" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <rect x="690" y="356" width="280" height="30" rx="11" fill="#c0392b"/>
+  <rect x="690" y="370" width="280" height="16" fill="#c0392b"/>
+  <text x="704" y="376" font-size="12.5" font-weight="700" fill="#ffffff">UNMERGED &#8212; the systemic ones can&#8217;t land</text>
+
+  <!-- tombstone watermark -->
+  <g opacity="0.10" fill="#c0392b">
+    <path d="M905,470 a28,30 0 0 1 56,0 v64 h-56 z"/>
+    <rect x="893" y="534" width="80" height="14" rx="3"/>
+  </g>
+
+  <!-- DUELING PRs — emphasized -->
+  <rect x="704" y="398" width="252" height="84" rx="9" fill="#ffffff" stroke="#c0392b" stroke-width="2"/>
+  <text x="830" y="416" text-anchor="middle" font-size="10.5" font-weight="700" fill="#c0392b" letter-spacing="0.5">DUELING — BOTH OPEN, NEITHER MERGED</text>
+
+  <!-- left PR -->
+  <rect x="716" y="426" width="100" height="44" rx="7" fill="#fbeeec" stroke="#e2a9a1"/>
+  <text x="766" y="443" text-anchor="middle" font-size="12.5" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#c0392b">#2347</text>
+  <text x="766" y="458" text-anchor="middle" font-size="8.8" fill="#a04a40">return 200 for empty</text>
+  <text x="766" y="467" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c0392b">OPEN</text>
+
+  <!-- right PR -->
+  <rect x="844" y="426" width="100" height="44" rx="7" fill="#fbeeec" stroke="#e2a9a1"/>
+  <text x="894" y="443" text-anchor="middle" font-size="12.5" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#c0392b">#3213</text>
+  <text x="894" y="458" text-anchor="middle" font-size="8.8" fill="#a04a40">handle empty, no 500</text>
+  <text x="894" y="467" text-anchor="middle" font-size="8.5" font-weight="700" fill="#c0392b">OPEN</text>
+
+  <!-- duel double arrow -->
+  <line x1="819" y1="448" x2="841" y2="448" stroke="#c0392b" stroke-width="2.4" marker-start="url(#duelStart)" marker-end="url(#duel)"/>
+
+  <!-- #2381 huge failed rework -->
+  <rect x="704" y="494" width="252" height="50" rx="8" fill="#ffffff" stroke="#e2a9a1" stroke-dasharray="5 3"/>
+  <text x="716" y="514" font-size="12" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#7b3a33">#2381</text>
+  <rect x="762" y="503" width="58" height="16" rx="8" fill="#fbeeec" stroke="#e2a9a1"/>
+  <text x="791" y="515" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c0392b">CLOSED</text>
+  <text x="716" y="533" font-size="10.5" fill="#7b3a33">huge structural rework of the retry loop</text>
+  <text x="884" y="514" text-anchor="middle" font-size="11.5" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#c0392b">+1642</text>
+  <text x="884" y="533" text-anchor="middle" font-size="9.5" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#a04a40">30 files</text>
+
+  <!-- #2358 / #2364 loop bandaids -->
+  <rect x="704" y="556" width="252" height="46" rx="8" fill="#ffffff" stroke="#e2a9a1" stroke-dasharray="5 3"/>
+  <text x="716" y="576" font-size="12" font-weight="700" font-family="'SF Mono',Menlo,Consolas,monospace" fill="#7b3a33">#2358 &#183; #2364</text>
+  <text x="716" y="593" font-size="10.5" fill="#7b3a33">retry-loop bandaids</text>
+  <rect x="864" y="565" width="80" height="16" rx="8" fill="#fbeeec" stroke="#e2a9a1"/>
+  <text x="904" y="577" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c0392b">closed / open</text>
+
+  <!-- red label -->
+  <text x="830" y="626" text-anchor="middle" font-size="11.5" font-weight="700" fill="#c0392b">no quality signal to gate on &#8594; these stall</text>
+  <text x="830" y="646" text-anchor="middle" font-size="10.5" font-style="italic" fill="#a04a40">every structural fix argues about &#8220;is this page actually bad?&#8221;</text>
+  <text x="830" y="664" text-anchor="middle" font-size="10.5" font-style="italic" fill="#a04a40">— the exact question quality(doc) answers</text>
+
+  <!-- ===================== PUNCHLINE BANNER ===================== -->
+  <rect x="40" y="700" width="920" height="200" rx="14" fill="#0f2a44"/>
+  <rect x="40" y="700" width="6" height="200" rx="3" fill="#1565a8"/>
+  <text x="500" y="752" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff">One ~120-line primitive covers the whole grievance cluster</text>
+  <text x="500" y="780" text-anchor="middle" font-size="17" font-weight="700" fill="#7fb4e0">— and gives the stalled PRs the signal they&#8217;re missing.</text>
+
+  <!-- mini recap row inside banner -->
+  <g font-size="12">
+    <circle cx="250" cy="828" r="6" fill="#8a93a0"/>
+    <text x="266" y="832" fill="#cdd6e0">5 grievance clusters</text>
+    <text x="408" y="832" fill="#6f7d8c">&#8594;</text>
+    <circle cx="430" cy="828" r="6" fill="#1565a8"/>
+    <text x="446" y="832" fill="#cdd6e0">1 deterministic signal</text>
+    <text x="612" y="832" fill="#6f7d8c">&#8594;</text>
+    <circle cx="634" cy="828" r="6" fill="#166534"/>
+    <text x="650" y="832" fill="#cdd6e0">stop the whack-a-mole</text>
+    <text x="822" y="832" fill="#6f7d8c">+</text>
+    <circle cx="844" cy="828" r="6" fill="#c0392b"/>
+    <text x="860" y="832" fill="#cdd6e0">unstick PRs</text>
+  </g>
+  <text x="500" y="872" text-anchor="middle" font-size="11" fill="#9fb0c2">All issue / PR numbers are real (firecrawl/firecrawl), verified against the tracker; counts are comment counts (&#128172;).</text>
+</svg>

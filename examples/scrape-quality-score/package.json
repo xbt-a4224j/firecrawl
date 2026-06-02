@@ -1,0 +1,15 @@
+{
+  "name": "scrape-quality-score",
+  "private": true,
+  "type": "module",
+  "description": "Pathological-site corpus runner for the scrape-quality signal (lib/quality.ts)",
+  "scripts": {
+    "corpus": "tsx src/run-corpus.ts",
+    "corpus:engines": "tsx src/run-corpus.ts --engines",
+    "report": "tsx src/build-report.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
