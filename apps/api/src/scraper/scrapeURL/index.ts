@@ -82,6 +82,7 @@ import {
 import { htmlTransform } from "./lib/removeUnwantedElements";
 import { postprocessors } from "./postprocessors";
 import { rewriteUrl } from "./lib/rewriteUrl";
+import { detectSilentFailure, type Finding } from "./lib/silentFailure";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { tmpdir } from "node:os";
@@ -537,6 +538,7 @@ async function scrapeURLLoopIter(
       hasQuery;
 
     let checkMarkdown: string;
+    let silentFailures: Finding[] = []; // populated only on the real-markdown branch below
     const htmlSize = engineResult.html?.length ?? 0;
     const shouldSkipMarkdownCheck = htmlSize > MAX_HTML_SIZE_FOR_MARKDOWN_CHECK;
 
@@ -579,6 +581,12 @@ async function scrapeURLLoopIter(
           { logger: meta.logger, requestId, zeroDataRetention },
         );
       }
+
+      // checkMarkdown is real markdown only on this branch, so the markdown-tuned heuristics run
+      // only here. Flag-gated; otherwise silentFailures stays empty and the gate is unchanged.
+      if (meta.options.__experimental_catch_silent_failures) {
+        silentFailures = detectSilentFailure(checkMarkdown);
+      }
     }
 
     // Success factors
@@ -586,6 +594,9 @@ async function scrapeURLLoopIter(
     const isGoodStatusCode =
       (engineResult.statusCode >= 200 && engineResult.statusCode < 300) ||
       engineResult.statusCode === 304;
+    // A "silent 200": good status, non-empty, but the content heuristics say it's a bot wall /
+    // gate / shell / error page. Reject it like a failure so the waterfall escalates engines.
+    const isSilentFailure = silentFailures.length > 0;
     const hasNoPageError = engineResult.error === undefined;
     const isLikelyProxyError = [401, 403, 429].includes(
       engineResult.statusCode,
@@ -612,7 +623,7 @@ async function scrapeURLLoopIter(
     // NOTE: TODO: what to do when status code is bad is tough...
     // we cannot just rely on text because error messages can be brief and not hit the limit
     // should we just use all the fallbacks and pick the one with the longest text? - mogery
-    if (isLongEnough || !isGoodStatusCode) {
+    if ((isLongEnough && !isSilentFailure) || !isGoodStatusCode) {
       meta.logger.info("Scrape via " + engine + " deemed successful.", {
         factors: { isLongEnough, isGoodStatusCode, hasNoPageError },
       });
@@ -620,6 +631,7 @@ async function scrapeURLLoopIter(
     } else {
       meta.logger.warn("Scrape via " + engine + " deemed unsuccessful.", {
         factors: { isLongEnough, isGoodStatusCode, hasNoPageError },
+        silentFailures: silentFailures.map(f => f.code),
         length: engineResult.html?.trim().length ?? 0,
       });
       throw new EngineUnsuccessfulError(engine);

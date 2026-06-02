@@ -631,6 +631,9 @@ const baseScrapeOptions = z.strictObject({
   // quality(fetch) vs quality(playwright) on the same URL. Deliberately limited to these two —
   // both are local/cheap, so this can never select the paid fire-engine or a stealth proxy.
   __experimental_forceEngine: z.enum(["fetch", "playwright"]).optional(),
+  // Routing: run content heuristics on each engine's result and reject a "silent 200" (bot wall /
+  // gate / shell / error page) so the fallback waterfall escalates to a better engine.
+  __experimental_catch_silent_failures: z.boolean().prefault(false).optional(),
   __forceFirePDF: z.boolean().prefault(false).optional(),
 });
 
