@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 188" width="680" height="188" font-family="ui-sans-serif, system-ui" font-size="12">
+  <defs>
+    <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#94a3b8"/></marker>
+    <marker id="bg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#2563eb"/></marker>
+  </defs>
+  <text x="0" y="14" fill="#334155" font-weight="600">Acceptance gate, inside the engine fallback loop</text>
+  <rect x="0" y="30" width="120" height="38" rx="6" fill="#f8fafc" stroke="#cbd5e1"/><text x="60" y="54" text-anchor="middle" fill="#334155" font-family="ui-monospace, monospace">engine &#8594; html</text>
+  <rect x="160" y="30" width="150" height="38" rx="6" fill="#f8fafc" stroke="#cbd5e1"/><text x="235" y="54" text-anchor="middle" fill="#334155" font-family="ui-monospace, monospace">extract &#8594; markdown</text>
+  <rect x="350" y="30" width="120" height="38" rx="6" fill="#fff7ed" stroke="#c2410c"/><text x="410" y="54" text-anchor="middle" fill="#9a3412" font-family="ui-monospace, monospace">length &gt; 0 ?</text>
+  <rect x="540" y="30" width="140" height="38" rx="6" fill="#f0fdf4" stroke="#16a34a"/><text x="610" y="54" text-anchor="middle" fill="#15803d" font-family="ui-monospace, monospace">success: true</text>
+  <g stroke="#94a3b8" fill="none"><path d="M120 49 H158" marker-end="url(#ag)"/><path d="M310 49 H348" marker-end="url(#ag)"/><path d="M470 49 H538" marker-end="url(#ag)"/></g>
+  <text x="504" y="44" text-anchor="middle" fill="#64748b">yes</text>
+  <text x="350" y="90" fill="#b91c1c" font-size="11" font-family="ui-monospace, monospace">a 689-char captcha page is length &gt; 0, so it is accepted</text>
+  <rect x="160" y="118" width="430" height="44" rx="6" fill="#eff6ff" stroke="#2563eb" stroke-dasharray="4 3"/>
+  <text x="375" y="136" text-anchor="middle" fill="#1d4ed8">with __experimental_catch_silent_failures</text>
+  <text x="375" y="152" text-anchor="middle" fill="#1d4ed8" font-size="11" font-family="ui-monospace, monospace">also require: no silent-failure signature &#8594; else reject &#8594; next engine</text>
+  <path d="M410 68 V116" stroke="#2563eb" fill="none" stroke-dasharray="4 3" marker-end="url(#bg)"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 200" width="680" height="200" font-family="ui-sans-serif, system-ui" font-size="12">
+  <text x="0" y="14" fill="#334155" font-weight="600">Readable length does not separate real short pages from thin junk</text>
+  <line x1="40" y1="110" x2="660" y2="110" stroke="#94a3b8"/>
+  <text x="40" y="128" fill="#64748b" font-size="11">0</text>
+  <text x="600" y="128" fill="#64748b" font-size="11">1200 readable chars</text>
+  <line x1="108" y1="40" x2="108" y2="150" stroke="#b91c1c" stroke-dasharray="3 3" opacity="0.5"/>
+  <circle cx="108" cy="104" r="4" fill="#16a34a"/><circle cx="108" cy="116" r="4" fill="#b91c1c"/>
+  <text x="108" y="34" text-anchor="middle" fill="#334155" font-size="11" font-family="ui-monospace, monospace">134 chars</text>
+  <text x="108" y="50" text-anchor="middle" fill="#334155" font-size="11">example.com (real) = JS shell (junk)</text>
+  <circle cx="118" cy="116" r="4" fill="#b91c1c"/><text x="118" y="150" text-anchor="middle" fill="#b91c1c" font-size="11" font-family="ui-monospace, monospace">153 wall</text>
+  <circle cx="342" cy="116" r="4" fill="#b91c1c"/><text x="342" y="150" text-anchor="middle" fill="#b91c1c" font-size="11" font-family="ui-monospace, monospace">594 wall</text>
+  <circle cx="430" cy="104" r="4" fill="#16a34a"/><text x="430" y="92" text-anchor="middle" fill="#15803d" font-size="11" font-family="ui-monospace, monospace">767 iana</text>
+  <circle cx="615" cy="104" r="4" fill="#16a34a"/><text x="615" y="92" text-anchor="middle" fill="#15803d" font-size="11" font-family="ui-monospace, monospace">1131 python.org</text>
+  <circle cx="44" cy="180" r="4" fill="#16a34a"/><text x="54" y="184" fill="#334155" font-size="11">real (must pass)</text>
+  <circle cx="184" cy="180" r="4" fill="#b91c1c"/><text x="194" y="184" fill="#334155" font-size="11">junk (should catch) &#8212; interleaved, so no threshold works</text>
+</svg>
