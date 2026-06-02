@@ -250,6 +250,10 @@ export async function scrapeController(
                       zeroDataRetention,
                       teamFlags: req.acuc?.flags ?? null,
                       agentIndexOnly: (req as any).agentIndexOnly ?? false,
+                      // Eval-only knob (schema-validated enum: "fetch" | "playwright").
+                      ...(req.body.__experimental_forceEngine
+                        ? { forceEngine: req.body.__experimental_forceEngine }
+                        : {}),
                     },
                     skipNuq: true,
                     origin,

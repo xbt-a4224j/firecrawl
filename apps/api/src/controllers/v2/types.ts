@@ -627,6 +627,10 @@ const baseScrapeOptions = z.strictObject({
   __experimental_omceDomain: z.string().optional(),
   __experimental_engpicker: z.boolean().prefault(false).optional(),
   __experimental_quality: z.boolean().prefault(false).optional(),
+  // Eval-only: pin the scrape to a single engine so an offline harness can compare
+  // quality(fetch) vs quality(playwright) on the same URL. Deliberately limited to these two —
+  // both are local/cheap, so this can never select the paid fire-engine or a stealth proxy.
+  __experimental_forceEngine: z.enum(["fetch", "playwright"]).optional(),
   __forceFirePDF: z.boolean().prefault(false).optional(),
 });
 
