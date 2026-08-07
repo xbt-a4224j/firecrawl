@@ -94,7 +94,14 @@ the offline engpicker calibration would route on — quality, not just a similar
 - Thresholds are a defensible **first pass**, hand-set against documented failures — **not**
   golden-set calibrated. Calibrating them on a labelled corpus is the evals work itself.
 - It reports a **symptom**, not a cause. `JS_SHELL` means "this looks unrendered," not "the proxy
-  failed." The suggested fix is advisory; no retry is wired in.
+  failed." `suggestedFix` here stays advisory — `__experimental_quality` only annotates the
+  document. Acting on the symptom is a separate, narrower flag:
+  `__experimental_catch_silent_failures` runs four signature heuristics
+  ([`silentFailure.ts`](../../apps/api/src/scraper/scrapeURL/lib/silentFailure.ts)) inside the
+  engine loop and rejects a silent 200, so the existing fallback waterfall escalates to a better
+  engine instead of returning junk as success. See
+  [`examples/silent-success`](../silent-success/) for that detector and its labeled
+  precision/recall eval.
 - **Hard blocks are out of scope by design.** A 5xx anti-bot response fails loudly; quality() is for
   the 200s that *look* fine. The corpus includes a `hard_block` bucket as the contrast.
 - The corpus is **live and best-effort** — sites drift, so a URL can move buckets between runs. The
